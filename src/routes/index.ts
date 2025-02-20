@@ -4,7 +4,9 @@ import { UserRoutes } from '../app/modules/user/user.route';
 //import { AdminRoutes } from '../app/modules/admin/admin.route';
 import { RuleRoutes } from '../app/modules/rule/rule.route';
 import { ContactRoutes } from '../app/modules/contact-us/contact.route';
-import { TermsRoutes } from '../app/modules/termsAndConditions/terms.route';
+import { TermsRoutes } from '../app/modules/termsAgreement/terms.route';
+import { StationRoutes } from '../app/modules/station/station.route';
+import { ReviewRoutes } from '../app/modules/stationReview/review.route';
 const router = express.Router();
 
 router.use('/payment/webhook', express.raw({ type: 'application/json' }));
@@ -22,7 +24,14 @@ const apiRoutes = [
     path: '/terms',
     route: TermsRoutes
   },
-  
+  {
+    path: '/station',
+    route: StationRoutes
+  },
+  {
+    path: '/station',
+    route: ReviewRoutes
+  },
   { path: '/rule', route: RuleRoutes },
   { path: "/contact", route: ContactRoutes }
 

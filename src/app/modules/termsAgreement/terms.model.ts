@@ -17,7 +17,7 @@ const readSchema = new mongoose.Schema<IRead, ReadModel>(
   }
 );
 
-const workSchma = new mongoose.Schema<IWork, WorksModel>(
+const workSchema = new mongoose.Schema<IWork, WorksModel>(
   {
     title: {
       type: String,
@@ -46,7 +46,7 @@ const workSchma = new mongoose.Schema<IWork, WorksModel>(
   }
 );
 
-const operationSchma = new mongoose.Schema<IOperation, OperationModel>(
+const operationSchema = new mongoose.Schema<IOperation, OperationModel>(
     {
       title: {
         type: String,
@@ -76,5 +76,5 @@ const operationSchma = new mongoose.Schema<IOperation, OperationModel>(
   );
 
 export const Read = model<IRead>('Read', readSchema);
-export const Work = model<IWork>('Work', workSchma);
-export const Operation = model<IOperation>('Operation', operationSchma);
+export const Work = model<IWork>('Work', workSchema);
+export const Operation = model<IOperation>('Operation', operationSchema);
