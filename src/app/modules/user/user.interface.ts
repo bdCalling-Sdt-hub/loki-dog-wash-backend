@@ -6,45 +6,33 @@ export type ISocial = {
   username: string;
 }
 
-export type IZoomToken = {
-  access_token: string;
-  refresh_token: string;
-  expires_at: Date;
-}
 
 export type IUser = {
-  name: string;
-  role: USER_ROLES;
+  firstName: string;
+  lastName: string;
+  role?: USER_ROLES;
   stripeCustomerId: string;
   email: string;
-  industry: string;
-  timeZone: string;
   password: string;
-  phone: string;
-  about: string;
-  expertise: string[];
-  focus_area: string;
-  language: string[];
-  job_title: string;
-  company_name: string;
-  education: string;
-  institution_name: string;
-  country: string;
-  social: ISocial[];
+  phone?: string;
+  address?: string;
+  social?: ISocial[];
   image?: string;
   status: 'active' | 'inactive' |'delete';
   stripe_account_id?: string;
   verified: boolean;
-  zoom_tokens?: IZoomToken;
   authentication?: {
     isResetPassword: boolean;
     oneTimeCode: number;
     expireAt: Date;
   };
   refreshToken: string;
+  readTerms?: boolean;
+  workTerms?: boolean;
+  operationTerms?: boolean;
 };
 
-export type UserModal = {
+export type UserModel = {
   isExistUserById(id: string): any;
   isExistUserByEmail(email: string): any;
   isMatchPassword(password: string, hashPassword: string): boolean;

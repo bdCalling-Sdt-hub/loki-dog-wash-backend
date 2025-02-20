@@ -12,15 +12,15 @@ import stripe from '../../../config/stripe';
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //set role
-  //payload.role = USER_ROLES.MENTEE;
+  payload.role = USER_ROLES.USER;
   const stripeCustomer = await stripe.customers.create({
     email: payload.email || '',
-    name: payload.name || '',
+    name: payload.firstName || '',
     metadata: { role: payload.role ? payload.role.toString() : '' },
   });
 
   // Add Stripe Customer ID to the user payload
-  //payload.stripeCustomerId = stripeCustomer.id;
+  payload.stripeCustomerId = stripeCustomer.id;
   const createUser = await User.create(payload);
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
@@ -29,7 +29,7 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //send email
   const otp = generateOTP();
   const values = {
-    name: createUser.name,
+    name: createUser.firstName,
     otp: otp,
     email: createUser.email!,
   };

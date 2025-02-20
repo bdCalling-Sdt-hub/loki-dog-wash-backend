@@ -4,7 +4,7 @@ import { model, Schema } from 'mongoose';
 import config from '../../../config';
 import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
-import { ISocial, IUser, IZoomToken, UserModal } from './user.interface';
+import { ISocial, IUser, UserModel } from './user.interface';
 
 const socialSchema = new Schema<ISocial>({
   platform: {
@@ -15,21 +15,13 @@ const socialSchema = new Schema<ISocial>({
   },
 });
 
-const zoomTokenSchema = new Schema<IZoomToken>({
-  access_token: {
-    type: String,
-  },
-  refresh_token: {
-    type: String,
-  },
-  expires_at: {
-    type: Date,
-  },
-});
-
-const userSchema = new Schema<IUser, UserModal>(
+const userSchema = new Schema<IUser, UserModel>(
   {
-    name: {
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
       type: String,
       required: true,
     },
@@ -42,17 +34,8 @@ const userSchema = new Schema<IUser, UserModal>(
     role: {
       type: String,
       enum: Object.values(USER_ROLES),
-      required: true,
     },
     stripeCustomerId: { type: String, required: false },
-    industry: {
-      type: String,
-      required: true,
-    },
-    timeZone: {
-      type: String,
-      required: true,
-    },
     password: {
       type: String,
       required: true,
@@ -62,31 +45,7 @@ const userSchema = new Schema<IUser, UserModal>(
     phone: {
       type: String,
     },
-    about: {
-      type: String,
-    },
-    expertise: {
-      type: [String],
-    },
-    focus_area: {
-      type: String,
-    },
-    language: {
-      type: [String],
-    },
-    job_title: {
-      type: String,
-    },
-    company_name: {
-      type: String,
-    },
-    education: {
-      type: String,
-    },
-    institution_name: {
-      type: String,
-    },
-    country: {
+    address: {
       type: String,
     },
     social: {
@@ -109,9 +68,6 @@ const userSchema = new Schema<IUser, UserModal>(
       type: Boolean,
       default: false,
     },
-    zoom_tokens: {
-      type: zoomTokenSchema,
-    },
     authentication: {
       type: {
         isResetPassword: {
@@ -132,6 +88,18 @@ const userSchema = new Schema<IUser, UserModal>(
     refreshToken: {
       type: String,
     },
+    readTerms: {
+      type: Boolean,
+      default: false
+    },
+    workTerms: {
+      type: Boolean,
+      default: false
+    },
+    operationTerms: {
+      type: Boolean,
+      default: false
+    }
   },
 
   { timestamps: true }
@@ -172,4 +140,4 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-export const User = model<IUser, UserModal>('User', userSchema);
+export const User = model<IUser, UserModel>('User', userSchema);

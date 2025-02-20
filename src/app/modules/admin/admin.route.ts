@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response } from 'express';
+/*import express, { NextFunction, Request, Response } from 'express';
 import { USER_ROLES } from '../../../enums/user';
 import auth from '../../middlewares/auth';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
@@ -37,4 +37,4 @@ router.route('/update-admin/:id').patch(auth(USER_ROLES.SUPER_ADMIN), AdminContr
 router.route('/delete-admin/:id').delete(auth(USER_ROLES.SUPER_ADMIN), AdminController.deleteAdminBySuperAdmin);
 
 
-export const AdminRoutes = router;
+export const AdminRoutes = router;*/
