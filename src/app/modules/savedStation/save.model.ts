@@ -5,10 +5,12 @@ const savedSchema = new mongoose.Schema<ISave, SaveModel>(
   {
     userId: {
       type: String,
+      ref: 'User',
       required: true,
     },
     stationId: {
       type: String,
+      ref: 'Station',
       required: true,
     }
   },

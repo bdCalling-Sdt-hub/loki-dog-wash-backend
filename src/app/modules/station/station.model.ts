@@ -4,6 +4,7 @@ import { IStation, StationModel } from './station.interface';
 const reviewSchema = new mongoose.Schema({
     userId: {
       type: String,
+      ref: 'User',
       required: true,
     },
     name: {

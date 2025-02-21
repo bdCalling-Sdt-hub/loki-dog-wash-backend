@@ -14,7 +14,11 @@ const saveOrRemoveStationToDB = async (userId: string, stationId: string) => {
 
 
 const getAllSavedStationFromDB = async (userId: string) => {
-  const result = await Save.find({userId: userId});
+  const result = await Save.find({userId: userId})
+    .populate({
+      path: 'stationId',
+      select: 'name description location contact image slots review'
+    });
   return result;
 };
 export const SaveService = {

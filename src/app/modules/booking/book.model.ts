@@ -5,10 +5,12 @@ const bookingSchema = new mongoose.Schema<IBooking, BookingModel>(
   {
     userId: {
       type: String,
+      ref: 'User',
       required: true,
     },
     stationId: {
       type: String,
+      ref: 'Station',
       required: true,
     },
     date: {
