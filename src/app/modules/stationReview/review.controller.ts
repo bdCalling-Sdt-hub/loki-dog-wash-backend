@@ -14,7 +14,7 @@ const createReview = catchAsync(async (req: Request, res: Response) => {
     stationId
   };
   const result = await ReviewService.createReviewToDB(data);
-  sendResponse(res, {
+  sendResponse(res, { 
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Review created successfully',

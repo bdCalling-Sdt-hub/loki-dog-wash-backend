@@ -7,6 +7,8 @@ import { ContactRoutes } from '../app/modules/contact-us/contact.route';
 import { TermsRoutes } from '../app/modules/termsAgreement/terms.route';
 import { StationRoutes } from '../app/modules/station/station.route';
 import { ReviewRoutes } from '../app/modules/stationReview/review.route';
+import { SavedRoutes } from '../app/modules/savedStation/save.route';
+import { BookingRoutes } from '../app/modules/booking/book.route';
 const router = express.Router();
 
 router.use('/payment/webhook', express.raw({ type: 'application/json' }));
@@ -31,6 +33,14 @@ const apiRoutes = [
   {
     path: '/station',
     route: ReviewRoutes
+  },
+  {
+    path: '/station',
+    route: SavedRoutes
+  },
+  {
+    path: '/booking',
+    route: BookingRoutes
   },
   { path: '/rule', route: RuleRoutes },
   { path: "/contact", route: ContactRoutes }
