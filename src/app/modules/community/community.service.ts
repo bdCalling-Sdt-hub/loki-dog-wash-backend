@@ -80,6 +80,12 @@ const replyToQuestion = async (
     });
   }
 
+  // Emit to all users viewing the question
+  (global as any).io.to(`question_${questionId}`).emit('newReply', {
+    questionId,
+    reply: newReply,
+  });
+
   // Also emit to all users viewing the question
   (global as any).io.to(`question_${questionId}`).emit('newReply', {
     questionId,
