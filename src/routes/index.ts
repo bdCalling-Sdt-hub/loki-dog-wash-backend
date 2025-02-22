@@ -12,6 +12,7 @@ import { PackageRoutes } from '../app/modules/package/package.route';
 import { ConnectRoutes } from '../app/modules/connect-with-us/connect.route';
 import { FaqRoutes } from '../app/modules/faq/faq.route';
 import { AdminRoutes } from '../app/modules/admin/admin.route';
+import { CommunityRoutes } from '../app/modules/community/community.route';
 const router = express.Router();
 
 router.use('/payment/webhook', express.raw({ type: 'application/json' }));
@@ -60,6 +61,10 @@ const apiRoutes = [
   {
     path: '/faq',
     route: FaqRoutes
+  },
+  {
+    path: '/community',
+    route: CommunityRoutes
   },
   { path: '/rule', route: RuleRoutes },
   { path: "/contact", route: ContactRoutes }

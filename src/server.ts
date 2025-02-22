@@ -50,13 +50,28 @@ async function main() {
       socket.on('authenticate', async (data: { token: string }) => {
         try {
           const { token } = data;
-          const { id } = jwtHelper.verifyToken(token, config.jwt.jwt_secret as string);
-      
-            onlineUsers[id] = socket.id;
-            console.log(`User ID ${id} authenticated with socket ID ${socket.id}`);
+          const { id } = jwtHelper.verifyToken(
+            token,
+            config.jwt.jwt_secret as string
+          );
+
+          onlineUsers[id] = socket.id;
+          console.log(
+            `User ID ${id} authenticated with socket ID ${socket.id}`
+          );
         } catch (error) {
           socket.emit('authenticated', { success: false });
         }
+      });
+
+      // Join question room when viewing a specific question
+      socket.on('joinQuestion', (questionId: string) => {
+        socket.join(`question_${questionId}`);
+      });
+
+      // Leave question room
+      socket.on('leaveQuestion', (questionId: string) => {
+        socket.leave(`question_${questionId}`);
       });
 
       socket.on('disconnect', () => {
