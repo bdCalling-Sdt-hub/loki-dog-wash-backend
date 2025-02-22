@@ -1,7 +1,6 @@
 import express from 'express';
 import { AuthRoutes } from '../app/modules/auth/auth.route';
 import { UserRoutes } from '../app/modules/user/user.route';
-//import { AdminRoutes } from '../app/modules/admin/admin.route';
 import { RuleRoutes } from '../app/modules/rule/rule.route';
 import { ContactRoutes } from '../app/modules/contact-us/contact.route';
 import { TermsRoutes } from '../app/modules/termsAgreement/terms.route';
@@ -11,6 +10,8 @@ import { SavedRoutes } from '../app/modules/savedStation/save.route';
 import { BookingRoutes } from '../app/modules/booking/book.route';
 import { PackageRoutes } from '../app/modules/package/package.route';
 import { ConnectRoutes } from '../app/modules/connect-with-us/connect.route';
+import { FaqRoutes } from '../app/modules/faq/faq.route';
+import { AdminRoutes } from '../app/modules/admin/admin.route';
 const router = express.Router();
 
 router.use('/payment/webhook', express.raw({ type: 'application/json' }));
@@ -23,6 +24,10 @@ const apiRoutes = [
   {
     path: '/auth',
     route: AuthRoutes,
+  },
+  {
+    path: '/admin',
+    route: AdminRoutes,
   },
   {
     path: '/terms',
@@ -51,6 +56,10 @@ const apiRoutes = [
   {
     path: '/connect',
     route: ConnectRoutes
+  },
+  {
+    path: '/faq',
+    route: FaqRoutes
   },
   { path: '/rule', route: RuleRoutes },
   { path: "/contact", route: ContactRoutes }

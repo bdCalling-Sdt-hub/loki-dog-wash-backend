@@ -1,4 +1,4 @@
-/*import { StatusCodes } from 'http-status-codes';
+import { StatusCodes } from 'http-status-codes';
 import { JwtPayload } from 'jsonwebtoken';
 import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
@@ -8,8 +8,10 @@ import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
 import { IUser } from '../user/user.interface';
 import { User } from '../user/user.model';
+import { paginationHelper } from '../../../helpers/paginationHelper';
+import { IPaginationOptions } from '../../../types/pagination';
 
-const createAdminToDB = async (payload: Partial<IUser>): Promise<IUser> => {
+/*const createAdminToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //set role
   payload.role = USER_ROLES.ADMIN;
   const createAdmin = await User.create(payload);
@@ -48,18 +50,6 @@ const getAllAdminFromDB = async (): Promise<Partial<IUser>[]> => {
   return result;
 };
 
-const getUserProfileFromDB = async (
-  user: JwtPayload
-): Promise<Partial<IUser>> => {
-  const { id } = user;
-  const isExistUser = await User.isExistUserById(id);
-  if (!isExistUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
-  }
-
-  return isExistUser;
-};
-
 const updateAdminBySuperAdminToDB = async (
   adminId: string,
   payload: Partial<IUser>
@@ -83,6 +73,18 @@ const deleteAdminBySuperAdminToDB = async (
   }
   const deleteDoc = await User.findOneAndDelete({ _id: adminId });
   return deleteDoc;
+};*/
+
+const getUserProfileFromDB = async (
+  user: JwtPayload
+): Promise<Partial<IUser>> => {
+  const { id } = user;
+  const isExistUser = await User.isExistUserById(id);
+  if (!isExistUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+
+  return isExistUser;
 };
 
 const updateProfileToDB = async (
@@ -107,12 +109,41 @@ const updateProfileToDB = async (
   return updateDoc;
 };
 
+const getAllUsersFromDB = async (
+  role: string, 
+  paginationOptions: IPaginationOptions
+): Promise<any> => {
+  // Calculate pagination
+  const { page, limit, skip, sortBy, sortOrder } = 
+    paginationHelper.calculatePagination(paginationOptions);
+
+  // Get users with pagination
+  const result = await User.find({ role: role })
+    .sort({ [sortBy]: sortOrder })
+    .skip(skip)
+    .limit(limit);
+
+  if (!result.length) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'No user found!');
+  }
+
+  // Get total count of users
+  const total = await User.countDocuments({ role: role });
+
+  const data = {
+    result,
+    meta: {
+      page,
+      limit,
+      total,
+    }
+  }
+  return data;
+};
+
 
 export const AdminService = {
-  createAdminToDB,
-  getAllAdminFromDB,
-  updateAdminBySuperAdminToDB,
   getUserProfileFromDB,
   updateProfileToDB,
-  deleteAdminBySuperAdminToDB,
-};*/
+  getAllUsersFromDB
+};

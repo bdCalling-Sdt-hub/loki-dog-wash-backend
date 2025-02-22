@@ -1,4 +1,4 @@
-/*import { z } from 'zod';
+import { z } from 'zod';
 
 const createAdminZodSchema = z.object({
   body: z.object({
@@ -44,4 +44,4 @@ const updateAdminZodSchema = z.object({
 export const AdminValidation = {
   createAdminZodSchema,
   updateAdminZodSchema
-};*/
+};

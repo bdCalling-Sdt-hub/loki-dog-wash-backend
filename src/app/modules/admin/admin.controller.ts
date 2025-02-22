@@ -1,12 +1,13 @@
-/*import { Request, Response } from 'express';
+import { Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import { getSingleFilePath } from '../../../shared/getFilePath';
 import sendResponse from '../../../shared/sendResponse';
-import { AdminService } from './admin.service';
 import ApiError from '../../../errors/ApiError';
+import { AdminService } from './admin.service';
+import { USER_ROLES } from '../../../enums/user';
 
-const createAdmin = catchAsync(
+/*const createAdmin = catchAsync(
   async (req: Request, res: Response) => {
     const { ...adminData } = req.body;
     const result = await AdminService.createAdminToDB(adminData);
@@ -65,7 +66,7 @@ const deleteAdminBySuperAdmin = catchAsync(
       data: result,
     });
   }
-);
+);*/
 
 const getUserProfile = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
@@ -102,13 +103,31 @@ const updateProfile = catchAsync(
   }
 );
 
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const role = USER_ROLES.USER;
+  
+  // Get pagination options from query parameters
+  const paginationOptions = {
+    page: Number(req.query.page),
+    limit: Number(req.query.limit),
+    sortBy: req.query.sortBy?.toString(),
+    sortOrder: req.query.sortOrder?.toString() as 'asc' | 'desc'
+  };
+
+  const result = await AdminService.getAllUsersFromDB(role, paginationOptions);
+  
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Users retrieved successfully',
+    data: result
+  });
+});
+
 
 
 export const AdminController = {
-  createAdmin,
-  getAllAdmin,
-  updateAdminBySuperAdmin,
   getUserProfile,
   updateProfile,
-  deleteAdminBySuperAdmin
-};*/
+  getAllUsers
+};

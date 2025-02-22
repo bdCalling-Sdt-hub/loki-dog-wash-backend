@@ -1,8 +1,6 @@
 export type IContact = {
     name: string;
     email: string;
-    phone: string;
-    country: string;
     message: string;
   }
   

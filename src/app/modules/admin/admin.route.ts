@@ -1,4 +1,4 @@
-/*import express, { NextFunction, Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { USER_ROLES } from '../../../enums/user';
 import auth from '../../middlewares/auth';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
@@ -23,7 +23,9 @@ router
     }
   );
 
-router
+router.route('/all-users').get(auth(USER_ROLES.SUPER_ADMIN), AdminController.getAllUsers);
+
+/*router
   .route('/add-admin')
   .post(
     auth(USER_ROLES.SUPER_ADMIN),
@@ -34,7 +36,7 @@ router
 
 router.route('/all-admin').get(auth(USER_ROLES.SUPER_ADMIN), AdminController.getAllAdmin);
 router.route('/update-admin/:id').patch(auth(USER_ROLES.SUPER_ADMIN), AdminController.updateAdminBySuperAdmin);
-router.route('/delete-admin/:id').delete(auth(USER_ROLES.SUPER_ADMIN), AdminController.deleteAdminBySuperAdmin);
+router.route('/delete-admin/:id').delete(auth(USER_ROLES.SUPER_ADMIN), AdminController.deleteAdminBySuperAdmin);*/
 
 
-export const AdminRoutes = router;*/
+export const AdminRoutes = router;

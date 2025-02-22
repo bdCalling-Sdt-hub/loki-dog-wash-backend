@@ -11,14 +11,6 @@ const contactSchema = new mongoose.Schema<IContact>(
       type: String,
       required: true,
     },
-    phone: {
-      type: String,
-      required: true,
-    },
-    country: {
-      type: String,
-      required: true,
-    },
     message: {
       type: String,
       required: true,
