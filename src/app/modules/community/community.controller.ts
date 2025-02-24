@@ -4,12 +4,18 @@ import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { CommunityService } from './community.service';
 import { ICommunity } from './community.interface';
+import { getSingleFilePath } from '../../../shared/getFilePath';
 
 const askQuestion = catchAsync(async (req: Request, res: Response) => {
   const { question } = req.body;
   const userId = req.user.id;
 
-  const result = await CommunityService.askQuestion({ question, userId });
+  const file = req.files ? getSingleFilePath(req.files, 'image') || 
+                                getSingleFilePath(req.files, 'doc') || 
+                                getSingleFilePath(req.files, 'media') 
+                              : undefined;
+
+  const result = await CommunityService.askQuestion({ question, userId, file });
 
   sendResponse<ICommunity>(res, {
     statusCode: StatusCodes.OK,

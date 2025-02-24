@@ -7,7 +7,8 @@ export type ICommunityReply = {
 };
 
 export type ICommunity = {
-  question: string;
+  question?: string;
+  file?: string;
   userId: string;
   replies: ICommunityReply[];
   createdAt?: Date;

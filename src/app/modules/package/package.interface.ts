@@ -3,7 +3,7 @@ import { Model } from 'mongoose';
 export type IPackage = {
     title: string;
     description: string;
-    price: Number;
+    price: number;
     duration: '1 month' | '1 year'; 
     paymentType: 'Monthly' | 'Yearly';
     productId?: string;

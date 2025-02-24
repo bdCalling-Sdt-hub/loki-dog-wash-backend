@@ -5,6 +5,7 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import router from './routes';
 import { Morgan } from './shared/morgen';
 import { PackageController } from './app/modules/package/package.contoller';
+import { SubscriptionController } from './app/modules/subscription/subscription.controller';
 const app = express();
 
 //morgan
@@ -14,7 +15,11 @@ app.use(Morgan.errorHandler);
 //body parser
 app.use(cors());
 
-app.use('/api/v1/webhook', express.raw({ type: 'application/json' }), PackageController.handleStripeWebhook);
+app.use(
+  '/api/v1/webhook',
+  express.raw({ type: 'application/json' }),
+  SubscriptionController.handleStripeWebhook
+);
 //
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

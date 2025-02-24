@@ -1,15 +1,15 @@
+import { IUser } from '../app/modules/user/user.interface';
 import { User } from '../app/modules/user/user.model';
 import config from '../config';
 import { USER_ROLES } from '../enums/user';
 import { logger } from '../shared/logger';
 
 const payload = {
-  name: 'Administrator',
+  firstName: 'Administrator',
+  lastName: 'Admin',
   email: config.super_admin.email,
   role: USER_ROLES.SUPER_ADMIN,
   password: config.super_admin.password,
-  industry: 'Super Admin',
-  timeZone: 'GMT',
   verified: true,
 };
 

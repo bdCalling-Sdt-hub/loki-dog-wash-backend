@@ -20,8 +20,10 @@ const communityReplySchema = new Schema({
 const communitySchema = new Schema<ICommunity>(
   {
     question: {
-      type: String,
-      required: true,
+      type: String
+    },
+    file: {
+      type: String
     },
     userId: {
       type: String,
