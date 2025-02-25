@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
 
 export type IAbout = {
-  title: string;
+  title?: string;
   description: string;
 }
 
