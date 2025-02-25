@@ -1,7 +1,7 @@
 import mongoose, { model } from 'mongoose';
-import { IContact } from './contact.interface';
+import { ContactModel, IContact } from './contact.interface';
 
-const contactSchema = new mongoose.Schema<IContact>(
+const contactSchema = new mongoose.Schema<IContact, ContactModel>(
   {
     name: {
       type: String,

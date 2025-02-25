@@ -1,7 +1,7 @@
 import { model, Schema } from 'mongoose';
-import { AboutModal, IAbout } from './about-us.interface';
+import { AboutModel, IAbout } from './about-us.interface';
 
-const AboutSchema = new Schema<IAbout, AboutModal>(
+const AboutSchema = new Schema<IAbout, AboutModel>(
   {
     title: {
       type: String,
@@ -14,4 +14,4 @@ const AboutSchema = new Schema<IAbout, AboutModal>(
   { timestamps: true }
 );
 
-export const About = model<IAbout, AboutModal>('About', AboutSchema);
+export const About = model<IAbout, AboutModel>('About', AboutSchema);

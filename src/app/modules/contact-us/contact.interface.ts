@@ -1,3 +1,4 @@
+import {Model} from 'mongoose';
 export type IContact = {
     name: string;
     email: string;
@@ -8,3 +9,6 @@ export type IContact = {
     success: boolean;
     message: string;
   }
+
+  export type ContactModel = Model<IContact, Record<string, unknown>>;
+

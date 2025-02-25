@@ -5,4 +5,4 @@ export type IAbout = {
   description: string;
 }
 
-export type AboutModal = Model<IAbout>;
+export type AboutModel = Model<IAbout>;

@@ -15,6 +15,7 @@ import { AdminRoutes } from '../app/modules/admin/admin.route';
 import { CommunityRoutes } from '../app/modules/community/community.route';
 import { SubscriptionRoutes } from '../app/modules/subscription/subscription.route';
 import { AboutRoutes } from '../app/modules/about-us/about-us.route';
+import { ReferRoutes } from '../app/modules/referFriends/refer.route';
 const router = express.Router();
 
 router.use('/payment/webhook', express.raw({ type: 'application/json' }));
@@ -75,6 +76,10 @@ const apiRoutes = [
   {
     path: '/about',
     route: AboutRoutes
+  },
+  {
+    path: '/refer',
+    route: ReferRoutes
   },
   { path: '/rule', route: RuleRoutes },
   { path: "/contact", route: ContactRoutes }

@@ -5,9 +5,6 @@ import { Contact } from './contact.model';
 
 const createContact = async (payload: IContact): Promise<IContactResponse> => {
   try {
-    // Save contact message to database
-    const contact = await Contact.create(payload);
-
     // Send confirmation email to user
     await emailHelper.sendEmail(
       contactEmailTemplate.userConfirmation({
@@ -21,11 +18,11 @@ const createContact = async (payload: IContact): Promise<IContactResponse> => {
       contactEmailTemplate.adminNotification({
         name: payload.name,
         email: payload.email,
-        phone: payload.phone,
-        country: payload.country,
         message: payload.message,
       })
     );
+    
+    await Contact.create(payload);
 
     return {
       success: true,

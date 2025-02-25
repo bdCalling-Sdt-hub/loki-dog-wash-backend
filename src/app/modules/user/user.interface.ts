@@ -1,11 +1,6 @@
 import { Model } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
-export type ISocial = {
-  platform: string;
-  username: string;
-}
-
 
 export type IUser = {
   firstName: string;
@@ -16,7 +11,6 @@ export type IUser = {
   password: string;
   phone?: string;
   address?: string;
-  social?: ISocial[];
   image?: string;
   status: 'active' | 'inactive' |'delete';
   stripe_account_id?: string;
@@ -26,6 +20,7 @@ export type IUser = {
     oneTimeCode: number;
     expireAt: Date;
   };
+  referCount?: number;
   refreshToken: string;
   readTerms?: boolean;
   workTerms?: boolean;

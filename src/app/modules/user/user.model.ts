@@ -4,16 +4,8 @@ import { model, Schema } from 'mongoose';
 import config from '../../../config';
 import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
-import { ISocial, IUser, UserModel } from './user.interface';
+import { IUser, UserModel } from './user.interface';
 
-const socialSchema = new Schema<ISocial>({
-  platform: {
-    type: String,
-  },
-  username: {
-    type: String,
-  },
-});
 
 const userSchema = new Schema<IUser, UserModel>(
   {
@@ -48,9 +40,6 @@ const userSchema = new Schema<IUser, UserModel>(
     address: {
       type: String,
     },
-    social: {
-      type: [socialSchema],
-    },
     image: {
       type: String,
       default: 'https://i.ibb.co/z5YHLV9/profile.png',
@@ -84,6 +73,10 @@ const userSchema = new Schema<IUser, UserModel>(
         },
       },
       select: 0,
+    },
+    referCount: {
+      type: Number,
+      default: 0,
     },
     refreshToken: {
       type: String,
