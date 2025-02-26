@@ -7,6 +7,7 @@ import { seedSuperAdmin } from './DB/seedAdmin';
 import { socketHelper } from './helpers/socketHelper';
 import { errorLogger, logger } from './shared/logger';
 import { jwtHelper } from './helpers/jwtHelper';
+import { Notification } from './app/modules/notification/notification.model';
 
 //uncaught exception
 process.on('uncaughtException', error => {
@@ -59,6 +60,19 @@ async function main() {
           console.log(
             `User ID ${id} authenticated with socket ID ${socket.id}`
           );
+
+          // Fetch unread notifications for this user
+          const unreadNotifications = await Notification.find({
+            receiverId: id,
+            read: false,
+          }).sort({ createdAt: -1 });
+
+          // Send unread notifications to the user
+          if (unreadNotifications.length > 0) {
+            socket.emit('pendingNotifications', unreadNotifications);
+          }
+
+          socket.emit('authenticated', { success: true });
         } catch (error) {
           socket.emit('authenticated', { success: false });
         }
