@@ -29,6 +29,7 @@ const createPackage = async (payload: IPackage) => {
           quantity: 1,
         },
       ],
+      metadata: payload,
     });
   
     // Prepare data for database

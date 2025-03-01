@@ -26,23 +26,36 @@ const handleStripeWebhook = catchAsync(async (req: Request, res: Response) => {
   let event;
   
   try {
+    // Important: The raw body is needed for signature verification
+    // Make sure your Express app is configured to preserve the raw body
+    // for Stripe webhook endpoints
     event = stripe.webhooks.constructEvent(
       req.body,
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err: any) {
+    console.error(`Webhook signature verification failed: ${err.message}`);
     throw new ApiError(StatusCodes.BAD_REQUEST, `Webhook Error: ${err.message}`);
   }
 
-  // Handle subscription-related events
-  await SubscriptionService.handleSubscriptionWebhook(event);
+  try {
+    // Handle subscription-related events
+    await SubscriptionService.handleSubscriptionWebhook(event);
 
-  sendResponse(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: 'Webhook handled successfully',
-  });
+    sendResponse(res, {
+      statusCode: StatusCodes.OK,
+      success: true,
+      message: 'Webhook handled successfully',
+    });
+  } catch (error: any) {
+    console.error(`Error processing webhook: ${error.message}`);
+    sendResponse(res, {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: `Error processing webhook: ${error.message}`,
+    });
+  }
 });
 
 const cancelSubscription = catchAsync(async (req: Request, res: Response) => {

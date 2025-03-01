@@ -21,7 +21,6 @@ export type IUser = {
     expireAt: Date;
   };
   referCount?: number;
-  refreshToken: string;
   readTerms?: boolean;
   workTerms?: boolean;
   operationTerms?: boolean;

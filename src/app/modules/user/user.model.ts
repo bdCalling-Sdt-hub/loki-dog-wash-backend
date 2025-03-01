@@ -78,9 +78,6 @@ const userSchema = new Schema<IUser, UserModel>(
       type: Number,
       default: 0,
     },
-    refreshToken: {
-      type: String,
-    },
     readTerms: {
       type: Boolean,
       default: false
