@@ -16,12 +16,15 @@ const createNotification = async ( payload:INotification) => {
 
 const getNotifications = async (
     user: JwtPayload,
-    paginationOptions: IPaginationOptions
+    paginationOptions: IPaginationOptions,
+    type: 'all' | 'announcement'
   ) => {
     const { page, limit, skip, sortBy, sortOrder } =
       paginationHelper.calculatePagination(paginationOptions);
 
-    const result = await Notification.find({ $or:[{receiverId: user.id}, {type: 'ANNOUNCEMENT'}] }).populate({
+      const query = type === 'announcement' ? {type: 'ANNOUNCEMENT'} :{ $or:[{receiverId: user.id}, {type: 'ANNOUNCEMENT'}] };
+
+    const result = await Notification.find(query).populate({
         path:'senderId',
         select:'firstName image'
     }).populate({

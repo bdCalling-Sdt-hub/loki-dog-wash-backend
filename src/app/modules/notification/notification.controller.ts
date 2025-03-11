@@ -7,7 +7,8 @@ import pick from "../../../shared/pick";
 const getNotifications = catchAsync(async(req:Request, res:Response) => {
     const user = req.user;
     const paginationOptions = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
-    const result = await NotificationServices.getNotifications(user, paginationOptions);
+    const {type} = req.query;
+    const result = await NotificationServices.getNotifications(user, paginationOptions, type as 'all' | 'announcement');
     sendResponse(res, {
       statusCode: 200,
       success: true,
