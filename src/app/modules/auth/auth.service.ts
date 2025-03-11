@@ -20,7 +20,7 @@ import { User } from '../user/user.model';
 //login
 const loginUserFromDB = async (payload: ILoginData) => {
   const { email, password } = payload;
-  const isExistUser = await User.findOne({ email }).select('+password');
+  const isExistUser = await User.findOne({ email }).select('+password').lean();
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
@@ -59,8 +59,8 @@ const loginUserFromDB = async (payload: ILoginData) => {
   await User.findByIdAndUpdate(isExistUser._id, { status: 'active' });
 
   (global as any).io.emit('userStatusUpdated', { userId: isExistUser._id, status: 'active' });
-
-  return { createToken };
+  const {password:Pass, ...restData} = isExistUser;
+  return {user:restData,accessToken:createToken};
 
 };
 //forget password
@@ -123,6 +123,17 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
       { verified: true, authentication: { oneTimeCode: null, expireAt: null } }
     );
     message = 'Email verify successfully';
+
+      //create token
+  const createToken = jwtHelper.createToken(
+    { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+    config.jwt.jwt_secret as Secret,
+    config.jwt.jwt_expire_in as string
+  );
+
+  const {authentication,...restData} = isExistUser;
+  data = {user:restData,accessToken:createToken};
+
   } else {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
@@ -251,10 +262,21 @@ const changePasswordToDB = async (
   await User.findOneAndUpdate({ _id: user.id }, updateData, { new: true });
 };
 
+
+const deleteProfile = async (user: JwtPayload) =>{
+
+  const deletedUser = await User.findByIdAndUpdate(user.id,{$set:{status:'delete'}}, {new: true});
+  if (!deletedUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete profile, please try again later.");
+  }
+
+}
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
   forgetPasswordToDB,
   resetPasswordToDB,
   changePasswordToDB,
+  deleteProfile,
 };

@@ -3,6 +3,7 @@ import ApiError from '../../../errors/ApiError';
 import { IBooking } from './book.interface';
 import { Booking } from './book.model';
 import { parse, format } from 'date-fns';
+import { Types } from 'mongoose';
 
 interface BookingPayload {
     userId: string;
@@ -34,8 +35,8 @@ interface BookingPayload {
       
       // Create the booking with the formatted date
       const bookingData: IBooking = {
-        userId: payload.userId,
-        stationId: payload.stationId,
+        userId: new Types.ObjectId(payload.userId),
+        stationId: new Types.ObjectId(payload.stationId),
         date: dateObj
       };
       
@@ -51,8 +52,20 @@ interface BookingPayload {
       );
     }
   };
-const getAllBookingFromDB = async (userId: string) => {
-  const result = await Booking.find({userId: userId});
+const getAllBookingFromDB = async (userId: Types.ObjectId, status?: "active" | 'history') => {
+
+  let query;
+  if (status === 'active') {
+    query = { $gte: new Date() };
+  } else if (status === 'history') {
+    query = { $lt: new Date() };
+  }
+
+
+  const result = await Booking.find({userId: userId, ...(status ? {date: query} : {})}).populate({
+    path: 'stationId',
+    select: {name: 1, location: 1, contact:1, image:1, description:1}
+  });
   if(!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to get booking');
   }

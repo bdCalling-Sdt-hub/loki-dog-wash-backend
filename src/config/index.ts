@@ -15,6 +15,8 @@ export default {
     jwt_refresh_secret: process.env.JWT_REFRESH_SECRET,
     jwt_refresh_expire_in: process.env.JWT_REFRESH_EXPIRE_IN
   },
+  announcement_receiving_code: process.env.ANNOUNCEMENT_RECEIVING_CODE,
+  firebase_service_account_base64: process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
   email: {
     from: process.env.EMAIL_FROM,
     user: process.env.EMAIL_USER,

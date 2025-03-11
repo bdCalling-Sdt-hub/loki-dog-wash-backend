@@ -30,4 +30,7 @@ router
     UserController.createUser
   );
 
+
+  
+
 export const UserRoutes = router;

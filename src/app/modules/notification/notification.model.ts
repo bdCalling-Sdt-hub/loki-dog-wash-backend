@@ -6,32 +6,33 @@ const notificationSchema = new Schema<INotification, NotificationModel>({
     type: String,
     required: true,
   },
+  title: {
+    type: String,
+    required: true,
+  },
   message: {
     type: String,
     required: true,
   },
   questionId: {
-    type: String,
-    required: true,
+    type: Schema.Types.ObjectId,
+    ref: 'Question',
+
   },
-  userId: {
-    type: String,
+  receiverId: {
+    type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+
   },
-  replyUserId: {
-    type: String,
+  senderId: {
+    type: Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
+
   },
   read: {
     type: Boolean,
     default: false,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  }
+},{timestamps:true});
 
 export const Notification = model<INotification>('Notification', notificationSchema);

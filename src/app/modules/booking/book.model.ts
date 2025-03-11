@@ -1,15 +1,15 @@
-import mongoose, { model } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { BookingModel, IBooking } from './book.interface';
 
 const bookingSchema = new mongoose.Schema<IBooking, BookingModel>(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     stationId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'Station',
       required: true,
     },

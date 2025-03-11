@@ -1,7 +1,7 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 export type IBooking = {
-  userId: string;
-  stationId: string;
+  userId: Types.ObjectId;
+  stationId: Types.ObjectId;
   date: Date;
 };
 

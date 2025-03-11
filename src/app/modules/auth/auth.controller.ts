@@ -28,7 +28,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
     success: true,
     statusCode: StatusCodes.OK,
     message: 'User logged in successfully.',
-    data: result.createToken,
+    data: result,
   });
 });
 
@@ -90,6 +90,18 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const deleteProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  await AuthService.deleteProfile(user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Profile deleted successfully',
+  });
+});
+
 export const AuthController = {
   verifyEmail,
   loginUser,
@@ -97,4 +109,5 @@ export const AuthController = {
   forgetPassword,
   resetPassword,
   changePassword,
+  deleteProfile,
 };

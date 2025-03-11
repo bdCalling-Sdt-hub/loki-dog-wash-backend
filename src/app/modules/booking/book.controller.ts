@@ -19,7 +19,8 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
 
 const getAllBooking = catchAsync(async (req: Request, res: Response) => {
     const userId = req.user.id;
-  const result = await BookingService.getAllBookingFromDB(userId);
+    const {status} = req.query;
+  const result = await BookingService.getAllBookingFromDB(userId, status as "active" | 'history' );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,

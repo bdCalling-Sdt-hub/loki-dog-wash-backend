@@ -14,6 +14,12 @@ router.post(
 router.post('/logout', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), AuthController.logoutUser);
 
 router.post(
+  '/delete-profile',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
+  AuthController.deleteProfile
+);
+
+router.post(
   '/forget-password',
   validateRequest(AuthValidation.createForgetPasswordZodSchema),
   AuthController.forgetPassword
@@ -33,9 +39,15 @@ router.post(
 
 router.post(
   '/change-password',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
   validateRequest(AuthValidation.createChangePasswordZodSchema),
   AuthController.changePassword
+);
+
+router.post(
+  '/delete-profile',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
+  AuthController.deleteProfile
 );
 
 export const AuthRoutes = router;

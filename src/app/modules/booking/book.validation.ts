@@ -16,9 +16,9 @@ const createBookingZodSchema = z.object({
     time: z.string({ required_error: 'Time is required' }).refine(
       val => {
         // Check if it follows the format: h AM/PM or hh AM/PM (e.g., 3 PM, 11 AM)
-        return /^(1[0-2]|0?[1-9])\s(AM|PM|am|pm)$/.test(val);
+        return /^(0?[1-9]|1[0-2])(\.([0-5]{1}[0-9]{1}))?\s(AM|PM|am|pm)$/.test(val);
       },
-      { message: 'Time format should be: h AM/PM (e.g., 3 PM, 11 AM)' }
+      { message: 'Time format should be: h AM/PM (e.g., 3.30 PM, 11.30 AM/am/pm)' }
     ),
   }),
   params: z.object({
