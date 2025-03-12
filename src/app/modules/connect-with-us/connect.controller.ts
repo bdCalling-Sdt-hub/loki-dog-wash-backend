@@ -66,5 +66,6 @@ export const ConnectWithUsController = {
     createConnectWithUs,
     getConnectWithUs,
     updateConnectWithUs,
-    deleteConnectWithUs
+    deleteConnectWithUs,
+    
 };

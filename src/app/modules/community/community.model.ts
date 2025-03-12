@@ -7,7 +7,7 @@ const communityReplySchema = new Schema({
     required: true,
   },
   userId: {
-    type: String,
+    type: Schema.Types.ObjectId,
     ref: 'User',
     required: true,
   },
@@ -26,7 +26,7 @@ const communitySchema = new Schema<ICommunity>(
       type: String
     },
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },

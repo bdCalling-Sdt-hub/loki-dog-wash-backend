@@ -1,42 +1,32 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import { CommunityController } from './community.controller';
 import auth from '../../middlewares/auth';
 import { USER_ROLES } from '../../../enums/user';
 import fileUploadHandler from '../../middlewares/fileUploadHandler';
+import { communityValidation } from './community.validation';
 
 const router = express.Router();
 
-router
-  .route('/questions')
-  .post(
-    auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN),
-    fileUploadHandler(),
-    CommunityController.askQuestion
-  )
-  .get(
-    auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN),
-    CommunityController.getAllQuestions
-  );
 
-router
-  .route('/questions/:questionId/reply')
-  .post(
-    auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN),
-    CommunityController.replyToQuestion
+router.post('/questions',auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN),fileUploadHandler(), (req:Request, res:Response, next:NextFunction)=>{
+ if(req.body.data) {
+  req.body = communityValidation.askQuestionZodSchema.parse(
+    JSON.parse(req.body.data)
   );
+ }   
+ CommunityController.askQuestion(req, res, next);
+})
 
-  router
-  .route('/notifications')
-  .get(
-    auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
-    CommunityController.getUserNotifications
+router.post('/questions/reply/:id',auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN),fileUploadHandler(), (req:Request, res:Response, next:NextFunction)=>{
+ if(req.body.data) {
+  req.body = communityValidation.replyToQuestionZodSchema.parse(
+    JSON.parse(req.body.data)
   );
+ }   
+ CommunityController.replyToQuestion(req, res, next);
+})
 
-router
-  .route('/notifications/:notificationId/read')
-  .patch(
-    auth(USER_ROLES.USER, USER_ROLES.SUPER_ADMIN),
-    CommunityController.markNotificationAsRead
-  );
+
+
 
 export const CommunityRoutes = router;

@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type ICommunityReply = {
   content: string;
@@ -9,7 +9,7 @@ export type ICommunityReply = {
 export type ICommunity = {
   question?: string;
   file?: string;
-  userId: string;
+  userId: Types.ObjectId;
   replies: ICommunityReply[];
   createdAt?: Date;
   updatedAt?: Date;

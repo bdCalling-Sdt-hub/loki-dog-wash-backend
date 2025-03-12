@@ -11,7 +11,7 @@ import { INotification } from '../app/modules/notification/notification.interfac
 export const sendNotification = async (
   namespace: string,
   recipient: Types.ObjectId | string,
-  data: INotification,
+  data: Partial<INotification>,
   pushNotificationData?: {
     deviceId: string;
     destination: string;

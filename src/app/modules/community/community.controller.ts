@@ -8,16 +8,15 @@ import { getSingleFilePath } from '../../../shared/getFilePath';
 
 const askQuestion = catchAsync(async (req: Request, res: Response) => {
   const { question } = req.body;
-  const userId = req.user.id;
 
   const file = req.files ? getSingleFilePath(req.files, 'image') || 
                                 getSingleFilePath(req.files, 'doc') || 
                                 getSingleFilePath(req.files, 'media') 
                               : undefined;
 
-  const result = await CommunityService.askQuestion({ question, userId, file });
+  const result = await CommunityService.askQuestion(req.user, { question, file });
 
-  sendResponse<ICommunity>(res, {
+  sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Question posted successfully',
@@ -25,63 +24,21 @@ const askQuestion = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 const replyToQuestion = catchAsync(async (req: Request, res: Response) => {
   const { content } = req.body;
-  const userId = req.user.id;
-  const questionId = req.params.questionId;
+  const questionId = req.params.id;
 
-  const result = await CommunityService.replyToQuestion(questionId, {
-    content,
-    userId,
-  });
+  const result = await CommunityService.replyToQuestion(req.user, questionId, content);
 
-  sendResponse<ICommunity>(res, {
+  sendResponse(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Reply posted successfully',
     data: result,
   });
 });
-
-const getAllQuestions = catchAsync(async (req: Request, res: Response) => {
-  const questions = await CommunityService.getAllQuestions();
-
-  sendResponse<ICommunity[]>(res, {
-    statusCode: StatusCodes.OK,
-    success: true,
-    message: 'Questions retrieved successfully',
-    data: questions,
-  });
-});
-
-const getUserNotifications = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user.id;
-    const notifications = await CommunityService.getUserNotifications(userId);
-  
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: 'Notifications retrieved successfully',
-      data: notifications,
-    });
-  });
-  
-  const markNotificationAsRead = catchAsync(async (req: Request, res: Response) => {
-    const { notificationId } = req.params;
-    const notification = await CommunityService.markNotificationAsRead(notificationId);
-  
-    sendResponse(res, {
-      statusCode: StatusCodes.OK,
-      success: true,
-      message: 'Notification marked as read',
-      data: notification,
-    });
-  });
-
 export const CommunityController = {
   askQuestion,
-  replyToQuestion,
-  getAllQuestions,
-  getUserNotifications,
-  markNotificationAsRead
+  replyToQuestion
 };
