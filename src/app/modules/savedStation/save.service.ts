@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { Save } from './save.model';
+import { Types } from 'mongoose';
 
 const saveOrRemoveStationToDB = async (userId: string, stationId: string) => {
   const result = await Save.findOne({stationId: stationId});
@@ -14,7 +15,7 @@ const saveOrRemoveStationToDB = async (userId: string, stationId: string) => {
 
 
 const getAllSavedStationFromDB = async (userId: string) => {
-  const result = await Save.find({userId: userId})
+  const result = await Save.find({userId: new Types.ObjectId(userId)})
     .populate({
       path: 'stationId',
       select: 'name description location contact image slots review'

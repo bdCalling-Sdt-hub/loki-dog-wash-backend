@@ -41,8 +41,9 @@ const stationSchema = new mongoose.Schema<IStation, StationModel>(
         type: String,
         required: true
     },
-    image: {
-        type: String
+    images: {
+        type: [String],
+        required:true
     },
     totalReviews: {
       type: Number,

@@ -15,8 +15,9 @@ const saveOrRemoveStation = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-const getAllSavedSation = catchAsync(async (req: Request, res: Response) => {
+const getAllSavedStation = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
+  console.log(req.user)
   const result = await SaveService.getAllSavedStationFromDB(userId);
   sendResponse(res, {
     success: true,
@@ -27,5 +28,5 @@ const getAllSavedSation = catchAsync(async (req: Request, res: Response) => {
 });
 export const SaveController = {
   saveOrRemoveStation,
-  getAllSavedSation
+  getAllSavedStation
 };

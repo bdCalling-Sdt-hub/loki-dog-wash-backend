@@ -1,8 +1,8 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type ISave = {
-  stationId: string;
-  userId: string;
+  stationId: Types.ObjectId;
+  userId: Types.ObjectId;
 };
 
 export type SaveModel = Model<ISave>;

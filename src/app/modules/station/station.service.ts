@@ -29,8 +29,18 @@ const getSingleStation = async(id:string)=>{
   return result;
 }
 
+
+const updateStation = async(id:string, payload:Partial<IStation>) =>{
+  const result = await Station.findByIdAndUpdate(id, payload, { new: true }).lean();
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to update station!');
+  }
+  return result;
+}
+
 export const StationService = {
   createStationToDB,
   getAllStationsFromDB,
-  getSingleStation
+  getSingleStation,
+  updateStation
 };

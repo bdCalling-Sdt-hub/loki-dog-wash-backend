@@ -51,7 +51,7 @@ const apiRoutes = [
     route: ReviewRoutes
   },
   {
-    path: '/station',
+    path: '/saved',
     route: SavedRoutes
   },
   {

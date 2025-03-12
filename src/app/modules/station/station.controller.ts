@@ -3,14 +3,14 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../../shared/catchAsync';
 import sendResponse from '../../../shared/sendResponse';
 import { StationService } from './station.service';
-import { getSingleFilePath } from '../../../shared/getFilePath';
+import { getMultipleFilesPath, getSingleFilePath } from '../../../shared/getFilePath';
 
 const createStation = catchAsync(async (req: Request, res: Response) => {
- let image = getSingleFilePath(req.files, 'image');
- let data = JSON.parse(req.body.data);
+ let image = getMultipleFilesPath(req.files, 'image');
+ console.log(image)
     const stationData = {
-      image,
-      ...data,
+      images:image,
+      ...req.body,
     };
   const result = await StationService.createStationToDB(stationData);
   sendResponse(res, {
@@ -43,8 +43,30 @@ const getSingleStation = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+
+const updateStation = catchAsync(async(req:Request, res:Response)=>{
+  let image = getMultipleFilesPath(req.files, 'image');
+  console.log(image)
+
+     const stationData = {
+       images:image,
+       ...req.body,
+     };
+
+
+   const result = await StationService.updateStation(req.params.id,stationData);
+   sendResponse(res, {
+     success: true,
+     statusCode: StatusCodes.OK,
+     message: 'Station updated successfully',
+     data: result,
+   });
+})
+
 export const StationController = {
   createStation,
   getAllStations,
-  getSingleStation
+  getSingleStation,
+  updateStation
 };

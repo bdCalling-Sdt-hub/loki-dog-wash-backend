@@ -7,6 +7,6 @@ import { SaveValidation } from './save.validation';
 const router = express.Router();
 
 router.route('/save-station/:stationId').post(auth(USER_ROLES.USER), validateRequest(SaveValidation.saveStationZodSchema), SaveController.saveOrRemoveStation);
-router.route('/all-saved-station').get(auth(USER_ROLES.USER), SaveController.getAllSavedSation);
+router.get('/all-saved-station', auth(USER_ROLES.USER), SaveController.getAllSavedStation);
 
 export const SavedRoutes = router;

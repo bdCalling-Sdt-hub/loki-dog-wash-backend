@@ -12,7 +12,7 @@ export type IStation = {
   description: string;
   location: string;
   contact: string;
-  image?: string;
+  images?: string[];
   rating:number;
   totalReviews:number;
   capacity:number;
