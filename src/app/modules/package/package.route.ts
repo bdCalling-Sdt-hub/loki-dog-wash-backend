@@ -12,11 +12,11 @@ router
 
 router
   .route('/get-all-packages')
-  .get(auth(USER_ROLES.SUPER_ADMIN), PackageController.getAllPackages);
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), PackageController.getAllPackages);
 
 router
   .route('/get-single-package/:id')
-  .get(auth(USER_ROLES.SUPER_ADMIN), validateRequest(PackageValidation.getSinglePackageZodSchema), PackageController.getSinglePackage);
+  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), validateRequest(PackageValidation.getSinglePackageZodSchema), PackageController.getSinglePackage);
 
 router
   .route('/update-package/:id')

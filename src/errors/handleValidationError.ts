@@ -1,22 +1,23 @@
-import { Error } from 'mongoose';
-import { IErrorMessage } from '../types/errors.types';
+import mongoose from 'mongoose'
+import { IGenericErrorMessage, IGenericErrorResponse } from '../types/errors.types'
 
-const handleValidationError = (error: Error.ValidationError) => {
-  const errorMessages: IErrorMessage[] = Object.values(error.errors).map(
-    (el: Error.ValidatorError | Error.CastError) => {
+const handleValidationError = (
+  error: mongoose.Error.ValidationError
+): IGenericErrorResponse => {
+  const errors: IGenericErrorMessage[] = Object.values(error.errors).map(
+    (el: mongoose.Error.ValidatorError | mongoose.Error.CastError) => {
       return {
-        path: el.path,
-        message: el.message,
-      };
+        path: el?.path,
+        message: el?.message,
+      }
     }
-  );
-
-  const statusCode = 400;
+  )
+  const statusCode = 400
   return {
     statusCode,
     message: 'Validation Error',
-    errorMessages,
-  };
-};
+    errorMessages: errors,
+  }
+}
 
-export default handleValidationError;
+export default handleValidationError

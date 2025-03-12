@@ -13,8 +13,11 @@ export type IStation = {
   location: string;
   contact: string;
   image?: string;
+  rating:number;
+  totalReviews:number;
+  capacity:number;
   slots: [string];
-  review?: IReview[];
+
 };
 
 export type StationModel = Model<IStation>;

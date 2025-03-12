@@ -31,7 +31,20 @@ const getAllStations = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+
+const getSingleStation = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await StationService.getSingleStation(id);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Station fetched successfully',
+    data: result,
+  });
+});
 export const StationController = {
   createStation,
-  getAllStations
+  getAllStations,
+  getSingleStation
 };

@@ -19,7 +19,26 @@ const getConnectWithUsFromDB = async (): Promise<IConnect[]> => {
   return result;
 };
 
+const updateConnectWithUsToDB = async (id: string, payload: IConnect): Promise<IConnect> => {
+  const result = await Connect.findByIdAndUpdate(id, payload, { new: true });
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to update connect with us');
+  }
+  return result;
+};
+
+const deleteConnectWithUsToDB = async(id:string)=>{
+  const result = await Connect.findByIdAndDelete(id);
+  if(!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Something went wrong, please try again.");
+  }
+
+  return "Deleted successfully."
+}
+
 export const ConnectWithUsService = {
   createConnectWithUsToDB,
   getConnectWithUsFromDB,
+  updateConnectWithUsToDB,
+  deleteConnectWithUsToDB
 };

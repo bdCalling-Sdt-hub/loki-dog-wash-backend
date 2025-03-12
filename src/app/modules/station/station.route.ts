@@ -9,5 +9,5 @@ const router = express.Router();
 
 router.route('/create-station').post(auth(USER_ROLES.SUPER_ADMIN), fileUploadHandler(), validateRequest(StationValidation.createStationZodSchema), StationController.createStation);
 router.route('/all-station').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), StationController.getAllStations);
-
+router.get('/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), StationController.getSingleStation);
 export const StationRoutes = router;

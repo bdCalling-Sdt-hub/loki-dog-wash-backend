@@ -7,6 +7,6 @@ import { ReviewValidation } from './review.validation';
 const router = express.Router();
 
 router.route('/create-review/:stationId').post(auth(USER_ROLES.USER), validateRequest(ReviewValidation.createReviewZodSchema), ReviewController.createReview);
-router.route('/get-review/:stationId').get(auth(USER_ROLES.SUPER_ADMIN), validateRequest(ReviewValidation.getReviewByStationIdZodSchema), ReviewController.getReviewByStationId);
+router.route('/get-review/:stationId').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN, USER_ROLES.USER), validateRequest(ReviewValidation.getReviewByStationIdZodSchema), ReviewController.getReviewByStationId);
 
 export const ReviewRoutes = router;

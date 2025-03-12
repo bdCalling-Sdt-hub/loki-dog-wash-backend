@@ -36,6 +36,9 @@ const createStationZodSchema = z.object({
               required_error: 'Slot is required',
             }).nonempty('Slot cannot be empty')
           ).nonempty('At least one slot is required'),
+          capacity: z.number({
+            required_error: 'Capacity is required',
+          }).nonnegative('Capacity cannot be negative'),
           // Review is optional in the model
           review: z.array(
             z.object({

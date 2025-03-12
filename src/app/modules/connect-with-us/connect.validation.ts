@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const createConnectWithUsZodSchema = z.object({
-  body: z.object({
+
     title: z
       .string({
         required_error: 'Title is required',
@@ -11,9 +11,15 @@ const createConnectWithUsZodSchema = z.object({
       .string({
         required_error: 'Link is required',
       })
-  }),
 });
+
+
+const updateConnectWithUsZodSchema = z.object({
+  title:z.string().optional(),
+  link:z.string().optional()
+})
 
 export const ConnectWithUsValidation = {
   createConnectWithUsZodSchema,
+  updateConnectWithUsZodSchema
 };

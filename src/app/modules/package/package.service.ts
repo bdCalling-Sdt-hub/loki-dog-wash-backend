@@ -14,7 +14,7 @@ const createPackage = async (payload: IPackage) => {
     // Create price in Stripe
     const price = await stripe.prices.create({
       product: product.id,
-      unit_amount: Number(payload.price) * 100, // Convert to cents
+      unit_amount: Number((Number(payload.price) * 100).toPrecision(2)), // Convert to cents
       currency: 'usd',
       recurring: {
         interval: payload.paymentType === 'Monthly' ? 'month' : 'year',

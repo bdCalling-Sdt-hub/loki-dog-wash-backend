@@ -44,14 +44,25 @@ const stationSchema = new mongoose.Schema<IStation, StationModel>(
     image: {
         type: String
     },
+    totalReviews: {
+      type: Number,
+      default: 0
+    },
+    rating:{
+      type:Number,
+      default:0
+    },
+    capacity:{
+      type:Number,
+      required:true
+    },
     slots: {
         type: [String],
         required: true
     },
-    review: {
-        type: [reviewSchema]
-    }
-  },
+    },
+   
+  
   {
     timestamps: true,
   }

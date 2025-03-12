@@ -19,7 +19,18 @@ const getAllStationsFromDB = async (): Promise<IStation[] | null> => {
   return result;
 };
 
+const getSingleStation = async(id:string)=>{
+  const result = await Station.findById(id).lean();
+
+  if(!result){
+    throw new ApiError(StatusCodes.BAD_REQUEST, "The requested station does not exist.")
+  }
+
+  return result;
+}
+
 export const StationService = {
   createStationToDB,
-  getAllStationsFromDB
+  getAllStationsFromDB,
+  getSingleStation
 };
