@@ -1,8 +1,10 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 export type IPackage = {
+    _id: Types.ObjectId;
     title: string;
     description: string;
+    content: string[];
     price: number;
     duration: '1 month' | '1 year'; 
     paymentType: 'Monthly' | 'Yearly';

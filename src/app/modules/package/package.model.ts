@@ -7,8 +7,13 @@ const savedSchema = new mongoose.Schema<IPackage, PackageModel>(
       type: String,
       required: true,
     },
+
     description: {
       type: String,
+      required: true,
+    },
+    content: {
+      type: [String],
       required: true,
     },
     price: {
@@ -18,12 +23,12 @@ const savedSchema = new mongoose.Schema<IPackage, PackageModel>(
     duration: {
       type: String,
       enum: ['1 month', '1 year'],
-      required: true,
+      // required: true,
     },
     paymentType: {
       type: String,
-      enum: ['Monthly', 'Yearly'],
-      required: true,
+      enum: ['Monthly', 'Yearly','Single'],
+      // required: true,
     },
     productId: {
       type: String

@@ -5,12 +5,13 @@ import { IRefer } from "./refer.interface";
 interface IUserConfirmation {
     email: string;
     referralCode: string;
+    referredBy: string
 }
 
 const userConfirmation = (values: IUserConfirmation): ISendEmail => {
     const data = {
         to: values.email,
-        subject: 'You\'ve Been Invited to Loki\'s Lavish Dog Wash',
+        subject: `You\'ve Been Invited to Loki\'s Lavish Dog Wash by ${values.referredBy}`,
         html: `<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 0;">
             <div style="max-width: 600px; margin: 0 auto; padding: 40px 20px;">
                 <div style="background-color: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">

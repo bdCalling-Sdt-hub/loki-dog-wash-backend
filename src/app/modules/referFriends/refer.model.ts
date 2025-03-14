@@ -1,4 +1,4 @@
-import mongoose, { model } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { IRefer, ReferModel } from './refer.interface';
 
 const referSchema = new mongoose.Schema<IRefer, ReferModel>(
@@ -8,13 +8,17 @@ const referSchema = new mongoose.Schema<IRefer, ReferModel>(
       required: true,
     },
     referredBy: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     referralCode: {
       type: String,
       required: true,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {

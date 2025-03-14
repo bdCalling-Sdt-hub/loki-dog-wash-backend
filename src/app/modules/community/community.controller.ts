@@ -38,7 +38,31 @@ const replyToQuestion = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+
+const getQuestions = catchAsync(async (req: Request, res: Response) => {
+  const result = await CommunityService.getQuestions();
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Questions fetched successfully',
+    data: result,
+  });
+});
+
+const getQuestion = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await CommunityService.getQuestion(id);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Question fetched successfully',
+    data: result,
+  });
+});
+
 export const CommunityController = {
   askQuestion,
-  replyToQuestion
+  replyToQuestion,
+  getQuestions,
+  getQuestion
 };

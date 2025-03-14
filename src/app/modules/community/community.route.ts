@@ -26,6 +26,9 @@ router.post('/questions/reply/:id',auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN),
  CommunityController.replyToQuestion(req, res, next);
 })
 
+router.get('/questions',auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN), CommunityController.getQuestions);
+
+router.get('/questions/:id',auth(USER_ROLES.USER,USER_ROLES.SUPER_ADMIN), CommunityController.getQuestion);
 
 
 

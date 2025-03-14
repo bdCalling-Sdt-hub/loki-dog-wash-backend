@@ -4,23 +4,21 @@ import { Subscription } from "./subscription.model";
 import { User } from "../user/user.model";
 import { Package } from "../package/package.model";
 import stripe from "../../../config/stripe";
+import { Booking } from "../booking/book.model";
 
-const createCheckoutSession = async (packageId: string, userId: string) => {
+const createCheckoutSession = async (packageId: string, userId: string, paymentMode: 'subscription' | 'payment' = 'subscription',bookingId?: string) => {
   try {
     // Find the user
     const user = await User.findById(userId);
-    if (!user) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+    if (!user || !user.stripeCustomerId) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Please create an stripe account first, then try again.');
     }
 
-    if (!user.stripeCustomerId) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'User does not have a stripe customer ID');
-    }
 
     // Find the package
     const packageData = await Package.findById(packageId);
     if (!packageData) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'Package not found');
+      throw new ApiError(StatusCodes.NOT_FOUND, 'Package not found, try again.');
     }
 
     // Create checkout session using existing customer ID
@@ -32,10 +30,11 @@ const createCheckoutSession = async (packageId: string, userId: string) => {
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: paymentMode,
       metadata: {
         userId: user._id.toString(),
         packageId: packageData._id.toString(),
+        ...(bookingId && { bookingId }),
       },
       success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
@@ -127,6 +126,26 @@ const handleSubscriptionWebhook = async (event: any) => {
               StatusCodes.INTERNAL_SERVER_ERROR,
               `Failed to save subscription: ${error.message}`
             );
+          }
+        }
+        break;
+
+        case 'payment_intent.payment_failed':{
+          const session = event.data.object;
+
+          if(!session.mode || session.mode !== 'subscription') {
+            console.log(`Deleting booking: ${session?.metadata?.bookingId}`);
+            await Booking.findOneAndDelete({ _id: session?.metadata?.bookingId });
+          }
+        }
+        break;
+
+        case 'checkout.session.expired':{
+          const session = event.data.object;
+
+          if(!session.mode || session.mode !== 'subscription') {
+            console.log(`Deleting booking: ${session?.metadata?.bookingId}`);
+            await Booking.findOneAndDelete({ _id: session?.metadata?.bookingId });
           }
         }
         break;

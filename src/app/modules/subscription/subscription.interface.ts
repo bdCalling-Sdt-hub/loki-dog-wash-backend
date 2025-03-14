@@ -9,6 +9,7 @@ export type ISubscription = {
   status: string;
   stripe_subscription_id: string;
   amount: number;
+  type: string;
 }
 
 export type SubscriptionModel = Model<ISubscription>;

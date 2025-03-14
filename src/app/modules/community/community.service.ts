@@ -114,8 +114,20 @@ const replyToQuestion = async (
 };
 
 
+const getQuestions = async () => {
+  const questions = await Community.find().populate('userId', 'firstName image').populate('replies.userId', 'firstName image').sort({ createdAt: -1 });
+  return questions;
+};
+
+
+const getQuestion = async (id: string) => {
+  const question = await Community.findById(id).populate('userId', 'firstName image').populate('replies.userId', 'firstName image');
+  return question;
+};
 
   export const CommunityService = {
   askQuestion,
-  replyToQuestion
+  replyToQuestion,
+  getQuestions,
+  getQuestion
 };

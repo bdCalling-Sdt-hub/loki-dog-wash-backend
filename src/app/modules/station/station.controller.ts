@@ -64,9 +64,22 @@ const updateStation = catchAsync(async(req:Request, res:Response)=>{
    });
 })
 
+const getStationSlotsWithAvailability = catchAsync(async (req: Request, res: Response) => {
+  const { stationId } = req.params;
+  const { date } = req.query;
+  const result = await StationService.getStationSlotsWithAvailability(stationId, date as string);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Station slots with availability fetched successfully',
+    data: result,
+  });
+});
+
 export const StationController = {
   createStation,
   getAllStations,
   getSingleStation,
-  updateStation
+  updateStation,
+  getStationSlotsWithAvailability
 };

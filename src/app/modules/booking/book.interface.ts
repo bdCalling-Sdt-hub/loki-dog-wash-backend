@@ -3,6 +3,7 @@ export type IBooking = {
   userId: Types.ObjectId;
   stationId: Types.ObjectId;
   date: Date;
+
 };
 
 export type BookingModel = Model<IBooking>;

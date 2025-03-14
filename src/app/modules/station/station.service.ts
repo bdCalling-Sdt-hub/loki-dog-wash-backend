@@ -2,6 +2,11 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { IStation } from './station.interface';
 import { Station } from './station.model';
+import { Types } from 'mongoose';
+import { Booking } from '../booking/book.model';
+import { SlotAvailability } from '../../../types/slots';
+import { format, parse } from 'date-fns';
+import { parseDateInUTC } from '../booking/booking.utils';
 
 const createStationToDB = async (payload: IStation): Promise<IStation | null> => {
   const result = await Station.create(payload);
@@ -38,9 +43,60 @@ const updateStation = async(id:string, payload:Partial<IStation>) =>{
   return result;
 }
 
+
+
+
+
+const getStationSlotsWithAvailability = async (
+  stationId: string,
+  dateString?: string
+): Promise<SlotAvailability[]> => {
+  try {
+    // Parse the date string or use the current date
+    const date = dateString
+      ? parseDateInUTC(dateString, 'dd/MM/yyyy')
+      : new Date();
+    date.setUTCHours(0, 0, 0, 0); // Set to start of the day in UTC
+
+    // Find the station
+    const station = await Station.findById(stationId).exec();
+    if (!station) {
+      throw new Error('Station not found');
+    }
+
+    // Fetch bookings for the given date
+    const bookings = await Booking.find({
+      stationId: new Types.ObjectId(stationId),
+      date: { $gte: date, $lt: new Date(date.getTime() + 86400000) }, // 24*60*60*1000
+    }).exec();
+
+
+    const bookedSlots = new Set(
+      bookings.map(booking => {
+
+        const localDateString = format(new Date(booking.date), 'yyyy-MM-dd hh:mm a');
+        const slots = localDateString.split(" ");
+        const removedZero = `${slots[1].startsWith('0') ? slots[1].slice(1) : slots[1]}`;
+        const formattedSlot = `${removedZero.replace(":", ".")} ${slots[2].toLowerCase()}`;
+        return formattedSlot;
+      })
+    );
+
+    // Map station slots to check availability
+    return station.slots.map(slot => ({
+      slot,
+      availability: !bookedSlots.has(slot.toLowerCase()), // Check if the slot is booked
+    }));
+  } catch (error) {
+    console.error('Error fetching slots:', error);
+    throw error;
+  }
+};
+
 export const StationService = {
   createStationToDB,
   getAllStationsFromDB,
   getSingleStation,
-  updateStation
+  updateStation,
+  getStationSlotsWithAvailability
 };

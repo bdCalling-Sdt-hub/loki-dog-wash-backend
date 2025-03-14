@@ -22,8 +22,6 @@ router
   .route('/update-package/:id')
   .patch(auth(USER_ROLES.SUPER_ADMIN), validateRequest(PackageValidation.updatePackageZodSchema), PackageController.updatePackage);
 
-router
-  .route('/delete-package/:id')
-  .delete(auth(USER_ROLES.SUPER_ADMIN), validateRequest(PackageValidation.deletePackageZodSchema), PackageController.deletePackage);
+router.delete('/delete-package/:id',auth(USER_ROLES.SUPER_ADMIN), validateRequest(PackageValidation.deletePackageZodSchema), PackageController.deletePackage);
 
 export const PackageRoutes = router;

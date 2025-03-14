@@ -16,10 +16,10 @@ const createPackage = async (payload: IPackage) => {
       product: product.id,
       unit_amount: Number((Number(payload.price) * 100).toPrecision(2)), // Convert to cents
       currency: 'usd',
-      recurring: {
-        interval: payload.paymentType === 'Monthly' ? 'month' : 'year',
-      },
+      ...(payload.duration && { recurring: { interval: payload.paymentType === 'Monthly' ? 'month' : 'year' } }),
     });
+
+   const {_id,content, ...rest} = payload
   
     // Create payment link
     const paymentLink = await stripe.paymentLinks.create({
@@ -29,7 +29,7 @@ const createPackage = async (payload: IPackage) => {
           quantity: 1,
         },
       ],
-      metadata: payload,
+      metadata: rest,
     });
   
     // Prepare data for database
@@ -82,9 +82,7 @@ const createPackage = async (payload: IPackage) => {
         product: plan.productId as string,
         unit_amount: Number(payload.price) * 100,
         currency: 'usd',
-        recurring: {
-          interval: plan.paymentType === 'Monthly' ? 'month' : 'year',
-        },
+        ...(payload.paymentType && { recurring: { interval: payload.paymentType === 'Monthly' ? 'month' : 'year' } }),
       });
   
       // Create new payment link

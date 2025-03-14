@@ -35,6 +35,11 @@ const subscriptionSchema = new mongoose.Schema<ISubscription, SubscriptionModel>
       type: Number,
       required: true,
     },
+    type: {
+      type: String,
+      enum: ['regular', 'referred'],
+      default: 'regular',
+    },
   },
   {
     timestamps: true,

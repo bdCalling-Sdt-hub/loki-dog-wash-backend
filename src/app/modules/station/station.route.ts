@@ -27,4 +27,6 @@ router.patch('/update-station/:id', auth(USER_ROLES.SUPER_ADMIN), fileUploadHand
 });
 router.route('/all-station').get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), StationController.getAllStations);
 router.get('/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), StationController.getSingleStation);
+
+router.get('/slots-with-availability/:stationId', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), StationController.getStationSlotsWithAvailability);
 export const StationRoutes = router;

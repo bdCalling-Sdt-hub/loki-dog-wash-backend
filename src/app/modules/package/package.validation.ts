@@ -7,17 +7,17 @@ const createPackageZodSchema = z.object({
       description: z.string({
         required_error: 'Description is required',
       }),
+      content: z.array(z.string({
+        required_error: 'Content is required',
+      })).min(1),
       price: z.number({
         required_error: 'Price is required',
       }).positive('Price must be a positive number'),
-      duration: z.enum(['1 month', '1 year'], {
-        required_error: 'Duration is required',
-        invalid_type_error: 'Duration must be either "1 month" or "1 year"',
-      }),
-      paymentType: z.enum(['Monthly', 'Yearly'], {
+      duration: z.string().optional(),
+      paymentType: z.enum(['Monthly', 'Yearly','Single'], {
         required_error: 'Payment type is required',
         invalid_type_error: 'Payment type must be either "Monthly" or "Yearly"',
-      }),
+      }).optional(),
       paymentLink: z.string().optional(),
       status: z.enum(['Active', 'Delete']).default('Active').optional(),
       productId: z.string().optional(),
@@ -29,6 +29,7 @@ const createPackageZodSchema = z.object({
     body: z.object({
       title: z.string().optional(),
       description: z.string().optional(),
+      content: z.array(z.string()).min(1).optional(),
       price: z.number().positive('Price must be a positive number').optional(),
       duration: z.enum(['1 month', '1 year']).optional(),
       paymentType: z.enum(['Monthly', 'Yearly']).optional(),
