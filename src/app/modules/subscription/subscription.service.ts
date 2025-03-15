@@ -5,11 +5,13 @@ import { User } from "../user/user.model";
 import { Package } from "../package/package.model";
 import stripe from "../../../config/stripe";
 import { Booking } from "../booking/book.model";
+import { Types } from "mongoose";
 
 const createCheckoutSession = async (packageId: string, userId: string, paymentMode: 'subscription' | 'payment' = 'subscription',bookingId?: string) => {
   try {
     // Find the user
-    const user = await User.findById(userId);
+    const user = await User.findById(new Types.ObjectId(userId));
+    console.log(user, userId)
     if (!user || !user.stripeCustomerId) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Please create an stripe account first, then try again.');
     }

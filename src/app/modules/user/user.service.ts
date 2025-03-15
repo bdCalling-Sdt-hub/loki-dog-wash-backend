@@ -15,6 +15,13 @@ import { userSearchableFields } from './user.constants';
 import { Subscription } from '../subscription/subscription.model';
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
+
+
+  const isEmailExist = await User.findOne({email:payload.email, status: {$ne: 'delete'}});
+  if (isEmailExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'An account with this email already exists, please try again with new email.');
+  }
+
   //set role
   payload.role = USER_ROLES.USER;
   const stripeCustomer = await stripe.customers.create({
@@ -22,6 +29,10 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
     name: payload.firstName || '',
     metadata: { role: payload.role ? payload.role.toString() : '' },
   });
+
+  if(!stripeCustomer.id) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Something went wrong, please try again.');
+  }
 
   // Add Stripe Customer ID to the user payload
   payload.stripeCustomerId = stripeCustomer.id;

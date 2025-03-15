@@ -14,7 +14,6 @@ const updateUserZodSchema = z.object({
   firstName: z.string().optional(),
   lastName: z.string().optional(),
   role: z.string().optional(),
-  password: z.string().optional(),
   stripeCustomerId: z.string().optional(),
   phone: z.string().optional(),
   address: z.string().optional(),

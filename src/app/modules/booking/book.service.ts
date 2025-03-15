@@ -62,11 +62,14 @@ interface BookingPayload {
           throw new ApiError(StatusCodes.BAD_REQUEST, 'Something went wrong, please try again.');
         }
 
+
         const result = await Booking.create(bookingData);
         if (!result) {
           throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create booking');
         }
-       const url= await SubscriptionService.createCheckoutSession(payload.userId, packageData._id.toString(), 'payment', result._id.toString());
+
+       const url= await SubscriptionService.createCheckoutSession( packageData._id.toString(), payload.userId, 'payment', result._id.toString());
+
         return url;
       }else{
         const result = await Booking.create(bookingData);
