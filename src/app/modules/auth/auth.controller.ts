@@ -7,6 +7,7 @@ import ApiError from '../../../errors/ApiError';
 import { jwtHelper } from '../../../helpers/jwtHelper';
 import { User } from '../user/user.model';
 import config from '../../../config';
+import { Types } from 'mongoose';
 
 const verifyEmail = catchAsync(async (req: Request, res: Response) => {
   const { ...verifyData } = req.body;
@@ -102,6 +103,18 @@ const deleteProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const activeOrRestrictUser = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const { id } = req.params;
+  const result = await AuthService.activeOrRestrictUser(user, new Types.ObjectId(id));
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: result,
+  });
+});
+
 export const AuthController = {
   verifyEmail,
   loginUser,
@@ -109,5 +122,6 @@ export const AuthController = {
   forgetPassword,
   resetPassword,
   changePassword,
+  activeOrRestrictUser,
   deleteProfile,
 };

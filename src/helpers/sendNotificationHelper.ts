@@ -32,6 +32,11 @@ export const sendNotification = async (
     );
   }
 
+  const populatedResult = await result.populate({
+    path: 'senderId',
+    select: '_id firstName image',
+  });
+
 
 //   if (pushNotificationData) {
 //     const { title, message, role, destination, id, icon, deviceId } = pushNotificationData;
@@ -52,7 +57,7 @@ export const sendNotification = async (
 //     }
 //   }
   //@ts-expect-error socket
-  global.io.emit(`${namespace}::${recipient}`, result);
+  global.io.emit(`${namespace}::${recipient}`, populatedResult);
 
 }
 

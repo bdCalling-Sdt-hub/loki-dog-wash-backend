@@ -12,6 +12,16 @@ const createReferZodSchema = z.object({
   }),
 });
 
+
+const verifyReferZodSchema = z.object({
+  body: z.object({
+    referralCode: z
+      .string({
+        required_error: 'Referral code is required',
+      }),
+  }),
+});
 export const ReferValidation = {
   createReferZodSchema,
+  verifyReferZodSchema,
 };

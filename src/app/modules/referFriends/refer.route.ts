@@ -16,4 +16,12 @@ router.route(
 );
 
 
+router.post(
+  '/verify-refer',
+  auth(USER_ROLES.USER),
+  validateRequest(ReferValidation.verifyReferZodSchema),
+  ReferController.verifyRefer
+);
+
+
 export const ReferRoutes = router;

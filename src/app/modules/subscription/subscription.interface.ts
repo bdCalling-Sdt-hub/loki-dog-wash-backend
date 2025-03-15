@@ -1,7 +1,7 @@
-import { Model, Schema } from "mongoose";
+import { Model, Schema, Types } from "mongoose";
 
 export type ISubscription = {
-  userId: string;
+  userId: Types.ObjectId;
   price_id?: string;
   plan_type: string;
   start_date: Date;

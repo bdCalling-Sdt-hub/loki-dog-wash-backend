@@ -4,6 +4,7 @@ import { INotification, NotificationModel } from './notification.interface';
 const notificationSchema = new Schema<INotification, NotificationModel>({
   type: {
     type: String,
+    enum: ['QUESTION_REPLY', 'ANNOUNCEMENT', 'REFERRAL','CONTACT'],
     required: true,
   },
   title: {

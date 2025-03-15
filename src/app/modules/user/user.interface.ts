@@ -25,6 +25,7 @@ export type IUser = {
   readTerms?: boolean;
   workTerms?: boolean;
   operationTerms?: boolean;
+  subscriptionType?: string;
 };
 
 export type UserModel = {
@@ -32,3 +33,12 @@ export type UserModel = {
   isExistUserByEmail(email: string): any;
   isMatchPassword(password: string, hashPassword: string): boolean;
 } & Model<IUser>;
+
+
+
+export type IUserFilterableFields ={
+  searchTerm?:string;
+  role?: USER_ROLES;
+  status?: 'active' | 'inactive' |'delete';
+
+}

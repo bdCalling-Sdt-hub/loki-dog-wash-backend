@@ -1,10 +1,10 @@
-import mongoose, { model } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { ISubscription, SubscriptionModel } from './subscription.interface';
 
 const subscriptionSchema = new mongoose.Schema<ISubscription, SubscriptionModel>(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
     },
     price_id: {

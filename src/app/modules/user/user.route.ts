@@ -30,7 +30,6 @@ router
     UserController.createUser
   );
 
-
-  
+router.get('/all', auth(USER_ROLES.SUPER_ADMIN), UserController.getAllUsers);
 
 export const UserRoutes = router;

@@ -3,12 +3,9 @@ import { ContactModel, IContact } from './contact.interface';
 
 const contactSchema = new mongoose.Schema<IContact, ContactModel>(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    email: {
-      type: String,
+    senderId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: true,
     },
     message: {

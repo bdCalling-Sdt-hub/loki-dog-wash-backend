@@ -4,6 +4,8 @@ import catchAsync from '../../../shared/catchAsync';
 import { getSingleFilePath } from '../../../shared/getFilePath';
 import sendResponse from '../../../shared/sendResponse';
 import { UserService } from './user.service';
+import pick from '../../../shared/pick';
+import { userFilterableFields } from './user.constants';
 
 const createUser = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
@@ -52,4 +54,18 @@ const updateProfile = catchAsync(
   }
 );
 
-export const UserController = { createUser, getUserProfile, updateProfile };
+
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const filterOptions = pick(req.query, userFilterableFields);
+  const paginationOptions = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
+  const result = await UserService.getAllUserFromDB(filterOptions, paginationOptions);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Users retrieved successfully',
+    data: result,
+  });
+});
+
+export const UserController = { createUser, getUserProfile, updateProfile, getAllUsers };

@@ -124,10 +124,32 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getGeneralStats = catchAsync(async (req: Request, res: Response) => {
+  const result = await AdminService.getGeneralStats();
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'General stats retrieved successfully',
+    data: result
+  });
+});
 
+
+const getYearlySubscriptionDataInMonthlyFormat = catchAsync(async (req: Request, res: Response) => {
+  const year = Number(req.query.year);
+  const result = await AdminService.getYearlySubscriptionDataInMonthlyFormat(year);
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Yearly subscription data retrieved successfully',
+    data: result
+  });
+});
 
 export const AdminController = {
   getUserProfile,
   updateProfile,
-  getAllUsers
+  getAllUsers,
+  getGeneralStats,
+  getYearlySubscriptionDataInMonthlyFormat
 };

@@ -1,3 +1,4 @@
+import { IContact } from '../app/modules/contact-us/contact.interface';
 import { ICreateAccount, IResetPassword } from '../types/emailTamplate';
 
 const createAccount = (values: ICreateAccount) => {
@@ -38,7 +39,49 @@ const resetPassword = (values: IResetPassword) => {
   return data;
 };
 
+const contactMessage = (values: any) => {
+  const data = {
+    to: values.email,
+    subject: `${values.name} has sent a new contact message`,
+    html: `<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+      <div style="max-width: 600px; margin: 30px auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+          
+          <!-- Header -->
+          <div style="text-align: center; padding-bottom: 20px; border-bottom: 2px solid #0b375e;">
+              <img src="https://i.postimg.cc/6pgNvKhD/logo.png" alt="Logo" style="width: 120px; margin-bottom: 10px;" />
+              <h2 style="color: #0b375e; font-size: 22px; margin: 0;">New Contact Message</h2>
+              <p style="color: #666; font-size: 14px; margin-top: 5px;">You have received a new message from your website contact form.</p>
+          </div>
+
+          <!-- Message Details -->
+          <div style="padding: 20px;">
+              <p style="font-size: 16px; color: #444;"><strong>Name:</strong> ${values.name}</p>
+              <p style="font-size: 16px; color: #444;"><strong>Email:</strong> <a href="mailto:${values.email}" style="color: #0b375e; text-decoration: none;">${values.email}</a></p>
+              <p style="font-size: 16px; color: #444;"><strong>Message:</strong></p>
+              <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; font-size: 15px; color: #333; line-height: 1.6;">
+                  ${values.message}
+              </div>
+          </div>
+
+          <!-- CTA -->
+          <div style="text-align: center; padding: 20px 0;">
+              <a href="mailto:${values.email}" style="background-color: #0b375e; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; display: inline-block;">Reply to ${values.name}</a>
+          </div>
+
+          <!-- Footer -->
+          <div style="text-align: center; padding: 15px; background-color: #f8f9fa; border-top: 1px solid #e2e8f0; font-size: 12px; color: #666;">
+              <p style="margin: 0;">&copy; ${new Date().getFullYear()} Your Company. All rights reserved.</p>
+          </div>
+
+      </div>
+    </body>`,
+  };
+  return data;
+};
+
+
 export const emailTemplate = {
   createAccount,
   resetPassword,
+  contactMessage,
 };

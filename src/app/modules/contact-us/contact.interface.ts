@@ -1,8 +1,7 @@
-import {Model} from 'mongoose';
+import {Model, Types} from 'mongoose';
 export type IContact = {
-    name: string;
-    email: string;
     message: string;
+    senderId: Types.ObjectId;
   }
   
   export type IContactResponse = {

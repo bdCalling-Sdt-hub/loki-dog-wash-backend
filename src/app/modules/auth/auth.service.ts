@@ -16,6 +16,7 @@ import cryptoToken from '../../../util/cryptoToken';
 import generateOTP from '../../../util/generateOTP';
 import { ResetToken } from '../resetToken/resetToken.model';
 import { User } from '../user/user.model';
+import { Types } from 'mongoose';
 
 //login
 const loginUserFromDB = async (payload: ILoginData) => {
@@ -272,6 +273,24 @@ const deleteProfile = async (user: JwtPayload) =>{
 
 }
 
+
+const activeOrRestrictUser = async (user: JwtPayload, id:Types.ObjectId) => {
+
+  const isUserExist = await User.findById(id);
+  if (!isUserExist) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
+  }
+
+  const status = isUserExist.status === 'active' ? 'inactive' : 'active';
+  const updatedUser = await User.findByIdAndUpdate(id, { $set: { status } }, { new: true });
+  if (!updatedUser) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update user status, please try again later.");
+  }
+
+  return `User ${status} successfully`;
+}
+
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
@@ -279,4 +298,5 @@ export const AuthService = {
   resetPasswordToDB,
   changePasswordToDB,
   deleteProfile,
+  activeOrRestrictUser
 };

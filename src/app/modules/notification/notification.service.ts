@@ -7,6 +7,7 @@ import ApiError from "../../../errors/ApiError";
 import { StatusCodes } from "http-status-codes";
 import { sendNotification } from "../../../helpers/sendNotificationHelper";
 import config from "../../../config";
+import { USER_ROLES } from "../../../enums/user";
 
 const createNotification = async ( payload:INotification) => {
     const result = await Notification.create(payload);
@@ -22,7 +23,14 @@ const getNotifications = async (
     const { page, limit, skip, sortBy, sortOrder } =
       paginationHelper.calculatePagination(paginationOptions);
 
-      const query = type === 'announcement' ? {type: 'ANNOUNCEMENT'} :{ $or:[{receiverId: user.id}, {type: 'ANNOUNCEMENT'}] };
+
+      let query;
+
+      if(user.role === USER_ROLES.SUPER_ADMIN || user.role === USER_ROLES.ADMIN) {
+        query ={ receiverId: user.id } ;
+      } else {
+        query = type === 'announcement' ? {type: 'ANNOUNCEMENT'} :{ $or:[{receiverId: user.id}, {type: 'ANNOUNCEMENT'}] };
+      }
 
     const result = await Notification.find(query).populate({
         path:'senderId',
@@ -37,7 +45,7 @@ const getNotifications = async (
     if (!result) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to get notifications');
     }
-    const total = await Notification.countDocuments({ userId: user.id });
+    const total = await Notification.countDocuments(query);
     return {
       meta: {
         page,

@@ -50,4 +50,10 @@ router.post(
   AuthController.deleteProfile
 );
 
+router.post(
+  '/active-restrict-user/:id',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
+  AuthController.activeOrRestrictUser
+);
+
 export const AuthRoutes = router;

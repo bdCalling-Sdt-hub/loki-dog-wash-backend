@@ -11,6 +11,9 @@ import { User } from '../user/user.model';
 import { paginationHelper } from '../../../helpers/paginationHelper';
 import { IPaginationOptions } from '../../../types/pagination';
 
+import { Booking } from '../booking/book.model';
+import { Subscription } from '../subscription/subscription.model';
+
 /*const createAdminToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //set role
   payload.role = USER_ROLES.ADMIN;
@@ -142,8 +145,90 @@ const getAllUsersFromDB = async (
 };
 
 
+
+//dashboard api's
+
+const getGeneralStats = async () => {
+  const totalUser = await User.countDocuments();  // Ensure the count is awaited
+
+  // Get active subscriber count
+  const activeSubscriberCount = await Subscription.countDocuments({
+    end_date: { $gte: new Date() },
+    status: 'active',
+  });
+
+  const totalOrders = await Booking.countDocuments();  // Ensure the count is awaited
+
+  // Calculate total revenue
+  const totalRevenueResult = await Booking.aggregate([
+    {
+      $match: {
+        date: { $lt: new Date() },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalRevenue: { $sum: '$amount' },
+      },
+    },
+  ]);
+
+  const totalRevenue = totalRevenueResult.length > 0 ? totalRevenueResult[0].totalRevenue : 0;  // Handle case when no revenue exists
+
+  console.log(totalRevenue, activeSubscriberCount, totalOrders, totalUser);
+  
+  return {
+    totalUser,
+    activeSubscriberCount,
+    totalOrders,
+    totalRevenue,
+  };
+};
+
+
+
+
+interface MonthlySubscriptionData {
+  [key: string]: number; // Key will be the month (e.g., "January"), value will be the count or total amount
+}
+
+async function getYearlySubscriptionDataInMonthlyFormat(year?: number): Promise<MonthlySubscriptionData> {
+
+  //if year is not provided, use current year
+  const currentYear = new Date().getFullYear();
+  const yearToUse = year || currentYear;
+
+  const startDate = new Date(yearToUse, 0, 1); // Start of the year
+  const endDate = new Date(yearToUse, 11, 31); // End of the year
+  const subscriptions = await Subscription.find({
+    start_date: { $gte: startDate, $lte: endDate },
+  }).exec();
+
+  const monthlyData: MonthlySubscriptionData = {};
+
+  // Initialize monthlyData with all months set to 0
+  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  monthNames.forEach(month => {
+    monthlyData[month] = 0;
+  });
+
+  subscriptions.forEach(subscription => {
+    const month = subscription.start_date.getMonth(); // Get the month index (0-11)
+    const monthName = monthNames[month];
+    monthlyData[monthName] += subscription.amount; // Assuming you want to sum the amounts. Adjust logic if needed.
+  });
+
+  return monthlyData;
+}
+
+
+
+
 export const AdminService = {
   getUserProfileFromDB,
   updateProfileToDB,
-  getAllUsersFromDB
+  getAllUsersFromDB,
+  getGeneralStats,
+  getYearlySubscriptionDataInMonthlyFormat
 };

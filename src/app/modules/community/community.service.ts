@@ -2,12 +2,9 @@ import { ICommunity, ICommunityReply } from './community.interface';
 import { Community } from './community.model';
 import ApiError from '../../../errors/ApiError';
 import { StatusCodes } from 'http-status-codes';
-import { onlineUsers } from '../../../server';
-import { Notification } from '../notification/notification.model';
-import { INotification } from '../notification/notification.interface';
+
 import { User } from '../user/user.model';
 import { JwtPayload } from 'jsonwebtoken';
-import { IUser } from '../user/user.interface';
 import { Types } from 'mongoose';
 import { sendNotification } from '../../../helpers/sendNotificationHelper';
 

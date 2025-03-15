@@ -16,6 +16,19 @@ const createRefer = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const verifyRefer = catchAsync(async (req: Request, res: Response) => {
+  const { referralCode } = req.body;
+
+  const result = await ReferService.verifyRefer(referralCode, req.user);
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Refer verified successfully',
+    data: result,
+  });
+});
+
 export const ReferController = {
   createRefer,
+  verifyRefer,
 };

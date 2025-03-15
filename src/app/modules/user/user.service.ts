@@ -6,9 +6,13 @@ import { emailHelper } from '../../../helpers/emailHelper';
 import { emailTemplate } from '../../../shared/emailTemplate';
 import unlinkFile from '../../../shared/unlinkFile';
 import generateOTP from '../../../util/generateOTP';
-import { IUser } from './user.interface';
+import { IUser, IUserFilterableFields } from './user.interface';
 import { User } from './user.model';
 import stripe from '../../../config/stripe';
+import { IPaginationOptions } from '../../../types/pagination';
+import { paginationHelper } from '../../../helpers/paginationHelper';
+import { userSearchableFields } from './user.constants';
+import { Subscription } from '../subscription/subscription.model';
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //set role
@@ -85,8 +89,69 @@ const updateProfileToDB = async (
 };
 
 
+const getAllUserFromDB = async (filterOptions: IUserFilterableFields, paginationOptions: IPaginationOptions) => {
+
+  const {page, limit, skip, sortBy, sortOrder} = paginationHelper.calculatePagination(paginationOptions);
+
+  const {searchTerm, ...filters} = filterOptions;
+
+  const andConditions: { [key: string]: any }[] = [];
+
+  if (searchTerm) {
+    userSearchableFields.forEach(field => {
+      andConditions.push({ [field]: { $regex: searchTerm, $options: 'i' } });
+    });
+  }
+
+  if(Object.keys(filters).length) {
+   Object.entries(filters).forEach(([key, value]) => {
+    andConditions.push({ [key]: value });
+   });
+  }
+
+  const whereConditions = andConditions.length > 0 ? { $and: andConditions } : {};
+
+  const result = await User.find(whereConditions).skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).lean();
+
+  const userIds = result.map(user => user._id); // Extract all user IDs
+
+  // Fetch all subscriptions for the users in a single query
+  const subscriptions = await Subscription.find({ userId: { $in: userIds } }).lean();
+  
+  // Create a map for quick lookup of subscriptions by userId
+  const subscriptionMap = new Map();
+  subscriptions.forEach(sub => {
+    subscriptionMap.set(sub.userId.toString(), sub.plan_type);
+  });
+  
+  // Map the subscription type to each user and add the `subscription Type` field
+  const resultWithSubscriptionType = result.map(user => {
+    return {
+      ...user, // Spread the existing user properties
+      subscriptionType: subscriptionMap.get(user._id.toString()) || "not subscribed", // Add the new field
+    };
+  });
+
+
+  const total = await User.countDocuments(whereConditions);
+  if (!result) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'No user found!');
+  }
+  return {
+    data: resultWithSubscriptionType,
+    meta: {
+      page,
+      limit,
+      total,
+      totalPage: Math.ceil(total / limit)
+    }
+  };
+};
+
+
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
+  getAllUserFromDB
 };

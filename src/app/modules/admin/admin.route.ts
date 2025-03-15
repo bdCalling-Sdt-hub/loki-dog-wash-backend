@@ -24,7 +24,9 @@ router
   );
 
 router.route('/all-users').get(auth(USER_ROLES.SUPER_ADMIN), AdminController.getAllUsers);
+router.get('/general-stats', auth(USER_ROLES.SUPER_ADMIN), AdminController.getGeneralStats);
 
+router.get('/yearly-subscription-data', auth(USER_ROLES.SUPER_ADMIN), AdminController.getYearlySubscriptionDataInMonthlyFormat);
 /*router
   .route('/add-admin')
   .post(
