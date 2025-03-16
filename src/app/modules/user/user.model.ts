@@ -26,7 +26,7 @@ const userSchema = new Schema<IUser, UserModel>(
       type: String,
       enum: Object.values(USER_ROLES),
     },
-    stripeCustomerId: { type: String, required: false },
+    stripeCustomerId: { type: String, required: true },
     password: {
       type: String,
       required: true,

@@ -8,6 +8,7 @@ import { Subscription } from '../subscription/subscription.model';
 import { parseDateInUTC } from './booking.utils';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { Package } from '../package/package.model';
+import { User } from '../user/user.model';
 
 interface BookingPayload {
     userId: string;
@@ -41,10 +42,20 @@ interface BookingPayload {
       date.setMilliseconds(0);
 
       // Check for subscription
-      const [subscription, existingBooking] = await Promise.all([
-        Subscription.findOne({ userId: new Types.ObjectId(payload.userId) }).lean(),
-        Booking.findOne({ stationId: new Types.ObjectId(payload.stationId), date: date }).lean()
+      const [subscription, existingBooking, user] = await Promise.all([
+        Subscription.findOne({ userId: new Types.ObjectId(payload.userId) }).populate({
+          path:"userId",
+          select: {stripeCustomerId: 1}
+        }).lean(),
+        Booking.findOne({ stationId: new Types.ObjectId(payload.stationId), date: date }).lean(),
+        User.findById(new Types.ObjectId(payload.userId)).lean()
       ]);
+
+      if(!user || user.stripeCustomerId === null){
+        throw new ApiError(StatusCodes.BAD_REQUEST, 'Create a stripe account first, and then book a slot');
+      }
+
+
 
       // Create booking
       const bookingData: IBooking = {

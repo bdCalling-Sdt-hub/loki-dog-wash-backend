@@ -10,7 +10,8 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
   const bookingData = {userId, stationId, ...req.body};
   const result = await BookingService.createBookingToDB(bookingData);
   sendResponse(res, {
-    statusCode: StatusCodes.OK,
+    //@ts-ignore
+    statusCode: result?.url ? 402 : StatusCodes.OK, // TODO: Check this
     success: true,
     message: 'Booking created successfully',
     data: result,
