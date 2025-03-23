@@ -11,7 +11,7 @@ const createCheckoutSession = async (packageId: string, userId: string, paymentM
   try {
     // Find the user
     const user = await User.findById(new Types.ObjectId(userId));
-    console.log(user, userId)
+    
     if (!user || !user.stripeCustomerId) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Please create an stripe account first, then try again.');
     }

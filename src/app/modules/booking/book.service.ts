@@ -79,7 +79,7 @@ interface BookingPayload {
           throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create booking');
         }
 
-       const url= await SubscriptionService.createCheckoutSession( packageData._id.toString(), payload.userId, 'payment', result._id.toString());
+        const url= await SubscriptionService.createCheckoutSession( packageData._id.toString(), payload.userId, 'payment', result._id.toString());
 
         return url;
       }else{

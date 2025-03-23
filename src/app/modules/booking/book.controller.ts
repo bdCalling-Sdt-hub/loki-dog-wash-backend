@@ -9,9 +9,10 @@ const createBooking = catchAsync(async (req: Request, res: Response) => {
     const stationId = req.params.stationId;
   const bookingData = {userId, stationId, ...req.body};
   const result = await BookingService.createBookingToDB(bookingData);
+
   sendResponse(res, {
     //@ts-ignore
-    statusCode: result?.url ? 402 : StatusCodes.OK, // TODO: Check this
+    statusCode: result?.url !== null || result?.url !== undefined ? 402 : StatusCodes.OK, // TODO: Check this
     success: true,
     message: 'Booking created successfully',
     data: result,
