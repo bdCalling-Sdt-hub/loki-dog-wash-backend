@@ -18,7 +18,7 @@ const createNotification = async ( payload:INotification) => {
 const getNotifications = async (
     user: JwtPayload,
     paginationOptions: IPaginationOptions,
-    type: 'all' | 'announcement'
+    type: 'all' | 'announcement' = 'all'
   ) => {
     const { page, limit, skip, sortBy, sortOrder } =
       paginationHelper.calculatePagination(paginationOptions);
@@ -29,7 +29,7 @@ const getNotifications = async (
       if(user.role === USER_ROLES.SUPER_ADMIN || user.role === USER_ROLES.ADMIN) {
         query ={ receiverId: user.id } ;
       } else {
-        query = type === 'announcement' ? {type: 'ANNOUNCEMENT'} :{ $or:[{receiverId: user.id}, {type: 'ANNOUNCEMENT'}] };
+        query = type.toLowerCase() === 'announcement' ? {type: 'ANNOUNCEMENT'} :{ $or:[{receiverId: user.id}, {type: {$ne: 'ANNOUNCEMENT'}}] };
       }
 
     const result = await Notification.find(query).populate({

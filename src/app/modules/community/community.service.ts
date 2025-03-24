@@ -74,11 +74,10 @@ const replyToQuestion = async (
 
   const questionOwnerId = populatedQuestion.userId._id.toString();
 
-
-
-
   const notificationPromises = uniqueRepliedUserIds.map(async (userId) => {
-    console.log('Notification sent to user:', userId);
+    console.log(userId, user.id)
+    // console.log('Notification sent to user:', userId);
+    if(userId === user.id) return;
     try {
       await sendNotification('notification', userId, {
         receiverId: new Types.ObjectId(userId),
@@ -95,6 +94,7 @@ const replyToQuestion = async (
   });
 
   const socketEmitPromises = uniqueRepliedUserIds.map(async (userId) => {
+    if(userId === user.id) return;
     try {
       (global as any).io.emit(`newReply::${userId}`, {
         questionId: populatedQuestion._id,
