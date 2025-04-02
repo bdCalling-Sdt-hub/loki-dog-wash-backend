@@ -18,7 +18,7 @@ const getAllSavedStationFromDB = async (userId: string) => {
   const result = await Save.find({userId: new Types.ObjectId(userId)})
     .populate({
       path: 'stationId',
-      select: 'name description location contact image slots review'
+      select: 'name description location contact images slots review'
     });
   return result;
 };

@@ -10,7 +10,7 @@ import { SavedRoutes } from '../app/modules/savedStation/save.route';
 import { BookingRoutes } from '../app/modules/booking/book.route';
 import { PackageRoutes } from '../app/modules/package/package.route';
 import { ConnectRoutes } from '../app/modules/connect-with-us/connect.route';
-import { FaqRoutes } from '../app/modules/faq/faq.route';
+import {  OtherRoutes } from '../app/modules/faq/faq.route';
 import { AdminRoutes } from '../app/modules/admin/admin.route';
 import { CommunityRoutes } from '../app/modules/community/community.route';
 import { SubscriptionRoutes } from '../app/modules/subscription/subscription.route';
@@ -71,8 +71,8 @@ const apiRoutes = [
     route: ConnectRoutes
   },
   {
-    path: '/faq',
-    route: FaqRoutes
+    path: '/others',
+    route: OtherRoutes
   },
   {
     path: '/community',

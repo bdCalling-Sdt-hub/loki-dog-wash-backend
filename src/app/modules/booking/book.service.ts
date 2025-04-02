@@ -108,7 +108,7 @@ const getAllBookingFromDB = async (userId: Types.ObjectId, status?: "active" | '
 
   const result = await Booking.find({userId: userId, ...(status ? {date: query} : {})}).populate({
     path: 'stationId',
-    select: {name: 1, location: 1, contact:1, image:1, description:1}
+    select: {name: 1, location: 1, contact:1, images:1, description:1}
   }).lean();
   if(!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to get booking');

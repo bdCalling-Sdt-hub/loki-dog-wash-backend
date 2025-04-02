@@ -93,7 +93,7 @@ async function main() {
       });
     });
   } catch (error) {
-    errorLogger.error(colors.red('🤢 Failed to connect Database'));
+    errorLogger.error(colors.red('🤢 Failed to connect Database', error));
   }
 
   //handle unhandleRejection

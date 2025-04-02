@@ -6,26 +6,11 @@ import validateRequest from '../../middlewares/validateRequest';
 import { FaqValidation } from './faq.validation';
 const router = express.Router();
 
-router
-    .route('/')
-    .post(
-        validateRequest(FaqValidation.createFaqZodSchema),
-        auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-        FaqController.createFaq
-    )
-    .get(
-        FaqController.getFaqs
-    );
+router.post('/createOrUpdateOthers', auth(USER_ROLES.SUPER_ADMIN), validateRequest(FaqValidation.createOrUpdateOthersZodSchema), FaqController.createOrUpdateOthers);
+router.get('/getOthers/:type', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN), FaqController.getOthers);
+router.post('/faq', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN), validateRequest(FaqValidation.addQuestionAndAnswerZodSchema), FaqController.addQuestionAndAnswer);
+router.delete('/faq/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN), validateRequest(FaqValidation.removeQuestionAndAnswerZodSchema), FaqController.removeQuestionAndAnswer);
+router.patch('/faq/:id', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN), validateRequest(FaqValidation.updateQuestionAndAnswerZodSchema), FaqController.updateQuestionAndAnswer);
+router.get('/faq', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN), FaqController.getFaq);
 
-router
-    .route('/:id')
-    .delete(
-        auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-        FaqController.deleteFaq
-    )
-    .patch(
-        auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.ADMIN),
-        FaqController.updateFaq
-    );
-
-export const FaqRoutes = router;
+export const OtherRoutes = router;
