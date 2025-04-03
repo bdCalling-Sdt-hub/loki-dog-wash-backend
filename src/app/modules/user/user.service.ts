@@ -13,13 +13,18 @@ import { IPaginationOptions } from '../../../types/pagination';
 import { paginationHelper } from '../../../helpers/paginationHelper';
 import { userSearchableFields } from './user.constants';
 import { Subscription } from '../subscription/subscription.model';
+import { Booking } from '../booking/book.model';
 
 const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
-
-
-  const isEmailExist = await User.findOne({email:payload.email, status: {$ne: 'delete'}});
+  const isEmailExist = await User.findOne({
+    email: payload.email,
+    status: { $ne: 'delete' },
+  });
   if (isEmailExist) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'An account with this email already exists, please try again with new email.');
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'An account with this email already exists, please try again with new email.'
+    );
   }
 
   //set role
@@ -30,8 +35,11 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
     metadata: { role: payload.role ? payload.role.toString() : '' },
   });
 
-  if(!stripeCustomer.id) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'Something went wrong, please try again.');
+  if (!stripeCustomer.id) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Something went wrong, please try again.'
+    );
   }
 
   // Add Stripe Customer ID to the user payload
@@ -40,7 +48,7 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   if (!createUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create user');
   }
-  
+
   //send email
   const otp = generateOTP();
   const values = {
@@ -63,7 +71,6 @@ const createUserToDB = async (payload: Partial<IUser>): Promise<IUser> => {
 
   return createUser;
 };
-
 
 const getUserProfileFromDB = async (
   user: JwtPayload
@@ -92,77 +99,92 @@ const updateProfileToDB = async (
     unlinkFile(isExistUser.image);
   }
 
-  const updateDoc = await User.findOneAndUpdate({ _id: id }, {$set: payload}, {
-    new: true,
-  });
+  const updateDoc = await User.findOneAndUpdate(
+    { _id: id },
+    { $set: payload },
+    {
+      new: true,
+    }
+  );
 
   return updateDoc;
 };
 
+const getAllUserFromDB = async (
+  filterOptions: IUserFilterableFields,
+  paginationOptions: IPaginationOptions
+) => {
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOptions);
 
-const getAllUserFromDB = async (filterOptions: IUserFilterableFields, paginationOptions: IPaginationOptions) => {
-
-  const {page, limit, skip, sortBy, sortOrder} = paginationHelper.calculatePagination(paginationOptions);
-
-  const {searchTerm, ...filters} = filterOptions;
-
+  const { searchTerm, stationId, ...filters } = filterOptions;
   const andConditions: { [key: string]: any }[] = [];
 
   if (searchTerm) {
-    userSearchableFields.forEach(field => {
-      andConditions.push({ [field]: { $regex: searchTerm, $options: 'i' } });
+    andConditions.push({
+      $or: userSearchableFields.map(field => ({
+        [field]: { $regex: searchTerm, $options: 'i' },
+      })),
     });
   }
 
-  if(Object.keys(filters).length) {
-   Object.entries(filters).forEach(([key, value]) => {
-    andConditions.push({ [key]: value });
-   });
+  if (Object.keys(filters).length) {
+    andConditions.push(
+      ...Object.entries(filters).map(([key, value]) => ({ [key]: value }))
+    );
   }
 
-  const whereConditions = andConditions.length > 0 ? { $and: andConditions } : {};
-
-  const result = await User.find(whereConditions).skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).lean();
-
-  const userIds = result.map(user => user._id); // Extract all user IDs
-
-  // Fetch all subscriptions for the users in a single query
-  const subscriptions = await Subscription.find({ userId: { $in: userIds } }).lean();
-  
-  // Create a map for quick lookup of subscriptions by userId
-  const subscriptionMap = new Map();
-  subscriptions.forEach(sub => {
-    subscriptionMap.set(sub.userId.toString(), sub.plan_type);
-  });
-  
-  // Map the subscription type to each user and add the `subscription Type` field
-  const resultWithSubscriptionType = result.map(user => {
-    return {
-      ...user, // Spread the existing user properties
-      subscriptionType: subscriptionMap.get(user._id.toString()) || "not subscribed", // Add the new field
-    };
-  });
-
-
-  const total = await User.countDocuments(whereConditions);
-  if (!result) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, 'No user found!');
+  if (stationId) {
+    const uniqueUsers = await Booking.distinct('userId', { stationId });
+    andConditions.push({ _id: { $in: uniqueUsers } });
   }
+
+  const whereConditions = andConditions.length ? { $and: andConditions } : {};
+
+  // Parallelize main queries
+  const [result, total, subscriptions] = await Promise.all([
+    User.find(whereConditions)
+      .skip(skip)
+      .limit(limit)
+      .sort({ [sortBy]: sortOrder })
+      .lean(),
+    User.countDocuments(whereConditions),
+    Subscription.find({
+      userId: {
+        $in: andConditions.some(c => c._id?.$in)
+          ? andConditions.find(c => c._id?.$in)?._id?.$in
+          : undefined,
+      },
+    }).lean(),
+  ]);
+
+  // Create subscription map using reduce
+  const subscriptionMap = subscriptions.reduce(
+    (map, sub) => map.set(sub.userId.toString(), sub.plan_type),
+    new Map()
+  );
+
+  // Transform results with map
+  const resultWithSubscriptionType = result.map(user => ({
+    ...user,
+    subscriptionType:
+      subscriptionMap.get(user._id.toString()) || 'not subscribed',
+  }));
+
   return {
-    data: resultWithSubscriptionType,
     meta: {
       page,
       limit,
       total,
-      totalPage: Math.ceil(total / limit)
-    }
+      totalPage: Math.ceil(total / limit),
+    },
+    data: resultWithSubscriptionType,
   };
 };
-
 
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
-  getAllUserFromDB
+  getAllUserFromDB,
 };

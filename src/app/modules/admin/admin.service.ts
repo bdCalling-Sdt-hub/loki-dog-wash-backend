@@ -13,6 +13,8 @@ import { IPaginationOptions } from '../../../types/pagination';
 
 import { Booking } from '../booking/book.model';
 import { Subscription } from '../subscription/subscription.model';
+import { Station } from '../station/station.model';
+import { monthNames } from './admin.utils';
 
 /*const createAdminToDB = async (payload: Partial<IUser>): Promise<IUser> => {
   //set role
@@ -113,15 +115,60 @@ const updateProfileToDB = async (
 };
 
 const getAllUsersFromDB = async (
-  role: string, 
-  paginationOptions: IPaginationOptions
+  paginationOptions: IPaginationOptions,
+  filters: {
+    searchTerm?: string;
+    stationId?: string;
+    status?: string;
+    role?: string;
+  }
 ): Promise<any> => {
   // Calculate pagination
-  const { page, limit, skip, sortBy, sortOrder } = 
+  const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
 
+  const { searchTerm, stationId, status, role } = filters;
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    ['name', 'email', 'contactNo'].map(field => {
+      andConditions.push({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      });
+    });
+  }
+
+  if (status) {
+    andConditions.push({
+      status: status,
+    });
+  }
+
+  if (stationId) {
+    //get user with booking history
+    const userIds = await Booking.distinct('userId', {
+      stationId: stationId,
+    });
+    andConditions.push({
+      _id: { $in: userIds },
+    });
+  }
+
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+
+  andConditions.push({
+    role: role,
+  });
   // Get users with pagination
-  const result = await User.find({ role: role })
+  const result = await User.find(whereConditions, {
+    stripe_account_id: 0,
+    stripeCustomerId: 0,
+  })
     .sort({ [sortBy]: sortOrder })
     .skip(skip)
     .limit(limit);
@@ -139,45 +186,55 @@ const getAllUsersFromDB = async (
       page,
       limit,
       total,
-    }
-  }
+    },
+  };
   return data;
 };
 
-
-
 //dashboard api's
 
-const getGeneralStats = async () => {
-  const totalUser = await User.countDocuments();  // Ensure the count is awaited
+const getGeneralStats = async (stationId?: string, year?: string) => {
+  const currentYear = new Date().getFullYear();
+  const yearToUse = Number(year) || currentYear;
+  const startDate = new Date(yearToUse, 0, 1); // Jan 1st
+  const endDate = new Date(yearToUse, 11, 31); // Dec 31st
 
-  // Get active subscriber count
-  const activeSubscriberCount = await Subscription.countDocuments({
-    end_date: { $gte: new Date() },
-    status: 'active',
-  });
+  // Base filter for all queries
+  const baseFilter = {
+    ...(stationId && { stationId }),
+    date: { $gte: startDate, $lte: endDate },
+  };
 
-  const totalOrders = await Booking.countDocuments();  // Ensure the count is awaited
+  // Get unique users in single query
+  const userIds = await Booking.distinct('userId', baseFilter);
 
-  // Calculate total revenue
-  const totalRevenueResult = await Booking.aggregate([
-    {
-      $match: {
-        date: { $lt: new Date() },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalRevenue: { $sum: '$amount' },
-      },
-    },
+  // Parallelize independent queries
+  const [totalUser, totalOrders, subscriptions] = await Promise.all([
+    // User count logic
+    stationId ? userIds.length : User.countDocuments(),
+
+    // Total orders
+    Booking.countDocuments(baseFilter),
+
+    // Subscriptions data
+    Subscription.find({
+      userId: { $in: userIds },
+      start_date: { $lte: endDate },
+      end_date: { $gte: startDate },
+    }),
   ]);
 
-  const totalRevenue = totalRevenueResult.length > 0 ? totalRevenueResult[0].totalRevenue : 0;  // Handle case when no revenue exists
+  // Active subscribers with single query
+  const activeSubscriberCount = await Subscription.countDocuments({
+    userId: { $in: userIds },
+    status: 'active',
+    start_date: { $lte: new Date() },
+    end_date: { $gte: new Date() },
+  });
 
-  console.log(totalRevenue, activeSubscriberCount, totalOrders, totalUser);
-  
+  // Calculate revenue using aggregation
+  const totalRevenue = subscriptions.reduce((sum, sub) => sum + sub.amount, 0);
+
   return {
     totalUser,
     activeSubscriberCount,
@@ -186,49 +243,61 @@ const getGeneralStats = async () => {
   };
 };
 
-
-
-
 interface MonthlySubscriptionData {
   [key: string]: number; // Key will be the month (e.g., "January"), value will be the count or total amount
 }
 
-async function getYearlySubscriptionDataInMonthlyFormat(year?: number): Promise<MonthlySubscriptionData> {
-
-  //if year is not provided, use current year
+async function getYearlySubscriptionDataInMonthlyFormat(
+  stationId?: string,
+  year?: number
+): Promise<MonthlySubscriptionData> {
   const currentYear = new Date().getFullYear();
   const yearToUse = year || currentYear;
+  const startDate = new Date(yearToUse, 0, 1);
+  const endDate = new Date(yearToUse, 11, 31);
 
-  const startDate = new Date(yearToUse, 0, 1); // Start of the year
-  const endDate = new Date(yearToUse, 11, 31); // End of the year
-  const subscriptions = await Subscription.find({
+  // Initialize monthly data with zeros
+  const monthlyData = monthNames.reduce((acc, month) => {
+    acc[month] = 0;
+    return acc;
+  }, {} as MonthlySubscriptionData);
+
+  // Build base query
+  const subscriptionFilter: any = {
     start_date: { $gte: startDate, $lte: endDate },
-  }).exec();
+  };
 
-  const monthlyData: MonthlySubscriptionData = {};
+  if (stationId) {
+    const userFilter = {
+      stationId,
+      date: { $gte: startDate, $lte: endDate },
+    };
+    const userIds = await Booking.distinct('userId', userFilter);
+    subscriptionFilter.userId = { $in: userIds };
+  }
 
-  // Initialize monthlyData with all months set to 0
-  const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  monthNames.forEach(month => {
-    monthlyData[month] = 0;
-  });
+  // Single query for subscriptions
+  const subscriptions = await Subscription.find(subscriptionFilter).exec();
 
-  subscriptions.forEach(subscription => {
-    const month = subscription.start_date.getMonth(); // Get the month index (0-11)
-    const monthName = monthNames[month];
-    monthlyData[monthName] += subscription.amount; // Assuming you want to sum the amounts. Adjust logic if needed.
+  // Aggregate amounts
+  subscriptions.forEach(({ start_date, amount }) => {
+    const monthName = monthNames[start_date.getMonth()];
+    monthlyData[monthName] += amount;
   });
 
   return monthlyData;
 }
 
-
-
+const getStationsForDashboard = async () => {
+  const stations = await Station.find().select({ _id: 1, name: 1 });
+  return stations;
+};
 
 export const AdminService = {
   getUserProfileFromDB,
   updateProfileToDB,
   getAllUsersFromDB,
   getGeneralStats,
-  getYearlySubscriptionDataInMonthlyFormat
+  getYearlySubscriptionDataInMonthlyFormat,
+  getStationsForDashboard,
 };

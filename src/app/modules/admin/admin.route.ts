@@ -23,10 +23,25 @@ router
     }
   );
 
-router.route('/all-users').get(auth(USER_ROLES.SUPER_ADMIN), AdminController.getAllUsers);
-router.get('/general-stats', auth(USER_ROLES.SUPER_ADMIN), AdminController.getGeneralStats);
+router
+  .route('/all-users')
+  .get(auth(USER_ROLES.SUPER_ADMIN), AdminController.getAllUsers);
+router.get(
+  '/general-stats',
+  auth(USER_ROLES.SUPER_ADMIN),
+  AdminController.getGeneralStats
+);
 
-router.get('/yearly-subscription-data', auth(USER_ROLES.SUPER_ADMIN), AdminController.getYearlySubscriptionDataInMonthlyFormat);
+router.get(
+  '/yearly-subscription-data',
+  auth(USER_ROLES.SUPER_ADMIN),
+  AdminController.getYearlySubscriptionDataInMonthlyFormat
+);
+router.get(
+  '/stations-for-dashboard',
+  auth(USER_ROLES.SUPER_ADMIN),
+  AdminController.getStationsForDashboard
+);
 /*router
   .route('/add-admin')
   .post(
@@ -39,6 +54,5 @@ router.get('/yearly-subscription-data', auth(USER_ROLES.SUPER_ADMIN), AdminContr
 router.route('/all-admin').get(auth(USER_ROLES.SUPER_ADMIN), AdminController.getAllAdmin);
 router.route('/update-admin/:id').patch(auth(USER_ROLES.SUPER_ADMIN), AdminController.updateAdminBySuperAdmin);
 router.route('/delete-admin/:id').delete(auth(USER_ROLES.SUPER_ADMIN), AdminController.deleteAdminBySuperAdmin);*/
-
 
 export const AdminRoutes = router;

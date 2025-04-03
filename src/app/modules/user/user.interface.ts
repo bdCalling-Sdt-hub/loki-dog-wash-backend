@@ -1,9 +1,8 @@
 import { Model, Types } from 'mongoose';
 import { USER_ROLES } from '../../../enums/user';
 
-
 export type IUser = {
-  _id:Types.ObjectId;
+  _id: Types.ObjectId;
   firstName: string;
   lastName: string;
   role?: USER_ROLES;
@@ -13,7 +12,7 @@ export type IUser = {
   phone?: string;
   address?: string;
   image?: string;
-  status: 'active' | 'inactive' |'delete';
+  status: 'active' | 'inactive' | 'delete';
   stripe_account_id?: string;
   verified: boolean;
   authentication?: {
@@ -34,11 +33,9 @@ export type UserModel = {
   isMatchPassword(password: string, hashPassword: string): boolean;
 } & Model<IUser>;
 
-
-
-export type IUserFilterableFields ={
-  searchTerm?:string;
+export type IUserFilterableFields = {
+  searchTerm?: string;
   role?: USER_ROLES;
-  status?: 'active' | 'inactive' |'delete';
-
-}
+  status?: 'active' | 'inactive' | 'delete';
+  stationId?: string;
+};

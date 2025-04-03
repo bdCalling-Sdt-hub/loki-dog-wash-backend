@@ -6,6 +6,7 @@ import sendResponse from '../../../shared/sendResponse';
 import ApiError from '../../../errors/ApiError';
 import { AdminService } from './admin.service';
 import { USER_ROLES } from '../../../enums/user';
+import pick from '../../../shared/pick';
 
 /*const createAdmin = catchAsync(
   async (req: Request, res: Response) => {
@@ -83,73 +84,97 @@ const getUserProfile = catchAsync(async (req: Request, res: Response) => {
 });
 
 //update profile
-const updateProfile = catchAsync(
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const image = getSingleFilePath(req.files, 'image');
+
+  const data = {
+    image,
+    ...req.body,
+  };
+  const result = await AdminService.updateProfileToDB(user, data);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Profile updated successfully',
+    data: result,
+  });
+});
+
+const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, [
+    'searchTerm',
+    'role',
+    'status',
+    'stationId',
+  ]);
+  const pagination = pick(req.query, [
+    'page',
+    'limit',
+    'skip',
+    'sortBy',
+    'sortOrder',
+  ]);
+
+  const result = await AdminService.getAllUsersFromDB(pagination, filters);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Users retrieved successfully',
+    data: result,
+  });
+});
+
+const getGeneralStats = catchAsync(async (req: Request, res: Response) => {
+  const stationId = req.query.stationId as string; // Assuming stationId is a query parameter
+  const result = await AdminService.getGeneralStats(
+    stationId,
+    req.query.year as string
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'General stats retrieved successfully',
+    data: result,
+  });
+});
+
+const getYearlySubscriptionDataInMonthlyFormat = catchAsync(
   async (req: Request, res: Response) => {
-    const user = req.user;
-    const image = getSingleFilePath(req.files, 'image');
-
-    const data = {
-      image,
-      ...req.body,
-    };
-    const result = await AdminService.updateProfileToDB(user, data);
-
+    const year = Number(req.query.year);
+    const stationId = req.query.stationId as string; // Assuming stationId is a query parameter
+    const result = await AdminService.getYearlySubscriptionDataInMonthlyFormat(
+      stationId,
+      year
+    );
     sendResponse(res, {
       success: true,
       statusCode: StatusCodes.OK,
-      message: 'Profile updated successfully',
+      message: 'Yearly subscription data retrieved successfully',
       data: result,
     });
   }
 );
 
-const getAllUsers = catchAsync(async (req: Request, res: Response) => {
-  const role = USER_ROLES.USER;
-  
-  // Get pagination options from query parameters
-  const paginationOptions = {
-    page: Number(req.query.page),
-    limit: Number(req.query.limit),
-    sortBy: req.query.sortBy?.toString(),
-    sortOrder: req.query.sortOrder?.toString() as 'asc' | 'desc'
-  };
-
-  const result = await AdminService.getAllUsersFromDB(role, paginationOptions);
-  
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: 'Users retrieved successfully',
-    data: result
-  });
-});
-
-const getGeneralStats = catchAsync(async (req: Request, res: Response) => {
-  const result = await AdminService.getGeneralStats();
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: 'General stats retrieved successfully',
-    data: result
-  });
-});
-
-
-const getYearlySubscriptionDataInMonthlyFormat = catchAsync(async (req: Request, res: Response) => {
-  const year = Number(req.query.year);
-  const result = await AdminService.getYearlySubscriptionDataInMonthlyFormat(year);
-  sendResponse(res, {
-    success: true,
-    statusCode: StatusCodes.OK,
-    message: 'Yearly subscription data retrieved successfully',
-    data: result
-  });
-});
+const getStationsForDashboard = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await AdminService.getStationsForDashboard();
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.OK,
+      message: 'Stations retrieved successfully',
+      data: result,
+    });
+  }
+);
 
 export const AdminController = {
   getUserProfile,
   updateProfile,
   getAllUsers,
   getGeneralStats,
-  getYearlySubscriptionDataInMonthlyFormat
+  getYearlySubscriptionDataInMonthlyFormat,
+  getStationsForDashboard,
 };
