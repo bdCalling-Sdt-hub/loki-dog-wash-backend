@@ -5,24 +5,29 @@ import sendResponse from '../../../shared/sendResponse';
 import { BookingService } from './book.service';
 
 const createBooking = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user.id;
-    const stationId = req.params.stationId;
-  const bookingData = {userId, stationId, ...req.body};
+  const userId = req.user.id;
+  const stationId = req.params.stationId;
+  const bookingData = { userId, stationId, ...req.body };
   const result = await BookingService.createBookingToDB(bookingData);
-
+  console.log(result);
   sendResponse(res, {
     //@ts-ignore
-    statusCode: result?.url !== null || result?.url !== undefined ? 402 : StatusCodes.OK, // TODO: Check this
+    statusCode: result.isPaymentRequired
+      ? StatusCodes.PAYMENT_REQUIRED
+      : StatusCodes.OK,
     success: true,
     message: 'Booking created successfully',
-    data: result,
+    data: result?.isPaymentRequired ? result.url : result?.booking,
   });
 });
 
 const getAllBooking = catchAsync(async (req: Request, res: Response) => {
-    const userId = req.user.id;
-    const {status} = req.query;
-  const result = await BookingService.getAllBookingFromDB(userId, status as "active" | 'history' );
+  const userId = req.user.id;
+  const { status } = req.query;
+  const result = await BookingService.getAllBookingFromDB(
+    userId,
+    status as 'active' | 'history'
+  );
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
@@ -33,5 +38,5 @@ const getAllBooking = catchAsync(async (req: Request, res: Response) => {
 
 export const BookingController = {
   createBooking,
-  getAllBooking
+  getAllBooking,
 };
