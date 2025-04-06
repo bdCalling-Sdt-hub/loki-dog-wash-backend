@@ -8,6 +8,10 @@ const bookingSchema = new mongoose.Schema<IBooking, BookingModel>(
       ref: 'User',
       required: true,
     },
+    timeCode: {
+      type: Number,
+      required: true,
+    },
     // subscriptionId: {
     //   type: Schema.Types.ObjectId,
     //   ref: 'Subscription',

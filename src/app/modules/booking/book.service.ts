@@ -2,14 +2,15 @@ import { StatusCodes } from 'http-status-codes';
 import ApiError from '../../../errors/ApiError';
 import { IBooking } from './book.interface';
 import { Booking } from './book.model';
-import { parse, format } from 'date-fns';
+import { format } from 'date-fns';
 import { Types } from 'mongoose';
 import { Subscription } from '../subscription/subscription.model';
-import { parseDateInUTC, purchaseSingleBooking } from './booking.utils';
-import { SubscriptionService } from '../subscription/subscription.service';
+import { purchaseSingleBooking } from './booking.utils';
+
 import { Package } from '../package/package.model';
 import { User } from '../user/user.model';
-import { url } from 'inspector';
+import { DateTime } from 'luxon';
+import { generateTimeCode } from '../station/station.utils';
 
 interface BookingPayload {
   userId: string;
@@ -41,6 +42,8 @@ const createBookingToDB = async (payload: BookingPayload) => {
     date.setSeconds(0);
     date.setMilliseconds(0);
 
+    const timeCode = generateTimeCode(payload.time);
+
     // Check for subscription
     const [subscription, existingBooking, user] = await Promise.all([
       Subscription.findOne({
@@ -58,6 +61,7 @@ const createBookingToDB = async (payload: BookingPayload) => {
         .lean(),
       Booking.findOne({
         stationId: new Types.ObjectId(payload.stationId),
+        timeCode: timeCode,
         date: date,
       }).lean(),
       User.findById(new Types.ObjectId(payload.userId)).lean(),
@@ -66,7 +70,7 @@ const createBookingToDB = async (payload: BookingPayload) => {
     if (!user || user.stripeCustomerId === null) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
-        'Create a stripe account first, and then book a slot'
+        'Create a stripe account first, and then book a slot.'
       );
     }
 
@@ -74,6 +78,7 @@ const createBookingToDB = async (payload: BookingPayload) => {
     const bookingData: IBooking = {
       userId: new Types.ObjectId(payload.userId),
       stationId: new Types.ObjectId(payload.stationId),
+      timeCode: Number(timeCode),
       // ...(subscription?._id && { subscriptionId: subscription._id }),
       date: date,
     };
