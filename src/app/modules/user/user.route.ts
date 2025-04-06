@@ -9,7 +9,10 @@ const router = express.Router();
 
 router
   .route('/profile')
-  .get(auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), UserController.getUserProfile)
+  .get(
+    auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+    UserController.getUserProfile
+  )
   .patch(
     auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
     fileUploadHandler(),
@@ -31,5 +34,11 @@ router
   );
 
 router.get('/all', auth(USER_ROLES.SUPER_ADMIN), UserController.getAllUsers);
+
+router.get(
+  '/subscription',
+  auth(USER_ROLES.USER),
+  UserController.getSubscribedPlan
+);
 
 export const UserRoutes = router;

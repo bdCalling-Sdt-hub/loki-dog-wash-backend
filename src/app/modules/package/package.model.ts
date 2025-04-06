@@ -7,7 +7,10 @@ const savedSchema = new mongoose.Schema<IPackage, PackageModel>(
       type: String,
       required: true,
     },
-
+    totalWash: {
+      type: Number,
+      required: true,
+    },
     description: {
       type: String,
       required: true,
@@ -27,14 +30,14 @@ const savedSchema = new mongoose.Schema<IPackage, PackageModel>(
     },
     paymentType: {
       type: String,
-      enum: ['Monthly', 'Yearly','Single'],
+      enum: ['Monthly', 'Yearly', 'Single'],
       // required: true,
     },
     productId: {
-      type: String
+      type: String,
     },
     priceId: {
-      type: String
+      type: String,
     },
     paymentLink: {
       type: String,

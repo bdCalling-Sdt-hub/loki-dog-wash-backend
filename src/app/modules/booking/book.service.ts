@@ -5,7 +5,7 @@ import { Booking } from './book.model';
 import { parse, format } from 'date-fns';
 import { Types } from 'mongoose';
 import { Subscription } from '../subscription/subscription.model';
-import { parseDateInUTC } from './booking.utils';
+import { parseDateInUTC, purchaseSingleBooking } from './booking.utils';
 import { SubscriptionService } from '../subscription/subscription.service';
 import { Package } from '../package/package.model';
 import { User } from '../user/user.model';
@@ -43,10 +43,17 @@ const createBookingToDB = async (payload: BookingPayload) => {
 
     // Check for subscription
     const [subscription, existingBooking, user] = await Promise.all([
-      Subscription.findOne({ userId: new Types.ObjectId(payload.userId) })
+      Subscription.findOne({
+        userId: new Types.ObjectId(payload.userId),
+        status: 'active',
+      })
         .populate({
           path: 'userId',
           select: { stripeCustomerId: 1 },
+        })
+        .populate<{ package_id: { paymentType: string; totalWash: number } }>({
+          path: 'package_id',
+          select: { paymentType: 1, totalWash: 1 },
         })
         .lean(),
       Booking.findOne({
@@ -63,16 +70,11 @@ const createBookingToDB = async (payload: BookingPayload) => {
       );
     }
 
-    let returnable = {
-      url: '',
-      booking: null,
-      isPaymentRequired: false,
-    };
-
     // Create booking
     const bookingData: IBooking = {
       userId: new Types.ObjectId(payload.userId),
       stationId: new Types.ObjectId(payload.stationId),
+      // ...(subscription?._id && { subscriptionId: subscription._id }),
       date: date,
     };
 
@@ -90,24 +92,77 @@ const createBookingToDB = async (payload: BookingPayload) => {
         );
       }
 
-      const result = await Booking.create(bookingData);
-      if (!result) {
-        throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create booking');
-      }
+      //calculate if the crated user is a new user or not if the new user is created only for 1 day
+      if (
+        user.createdAt &&
+        user.createdAt < new Date(new Date().setDate(new Date().getDate() - 1))
+      ) {
+        //also if the user already booked a slot
+        const existingBooking = await Booking.countDocuments({
+          userId: new Types.ObjectId(payload.userId),
+        });
 
-      const url = await SubscriptionService.createCheckoutSession(
+        if (existingBooking > 0) {
+          const singleBooking = await purchaseSingleBooking(
+            bookingData,
+            packageData._id.toString(),
+            payload.userId
+          );
+          return singleBooking;
+        }
+
+        const result = await Booking.create(bookingData);
+        return {
+          url: '',
+          booking: result,
+          isPaymentRequired: false,
+        };
+      }
+      const result = await purchaseSingleBooking(
+        bookingData,
         packageData._id.toString(),
-        payload.userId,
-        'payment',
-        result._id.toString()
+        payload.userId
       );
 
-      return {
-        url: url,
-        booking: null,
-        isPaymentRequired: true,
-      };
+      return result;
+      // const result = await Booking.create(bookingData);
+      // if (!result) {
+      //   throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create booking');
+      // }
+
+      // const url = await SubscriptionService.createCheckoutSession(
+      //   packageData._id.toString(),
+      //   payload.userId,
+      //   'payment',
+      //   result._id.toString()
+      // );
+
+      // return {
+      //   url: url,
+      //   booking: null,
+      //   isPaymentRequired: true,
+      // };
     } else {
+      // Check if the subscription is valid
+      //also see if the the total wash is less than the package limit
+      const totalWash = await Booking.countDocuments({
+        userId: new Types.ObjectId(payload.userId),
+        date: {
+          $gte: subscription.start_date,
+          $lte: new Date(subscription.end_date),
+        },
+      });
+
+      if (
+        Number(subscription.package_id.totalWash) !== -1 &&
+        totalWash >= subscription.package_id.totalWash
+      ) {
+        throw new ApiError(
+          StatusCodes.BAD_REQUEST,
+          'You have reached your limit for this month. Please visit the next month to book a new slot.'
+        );
+      }
+
       const result = await Booking.create(bookingData);
       if (!result) {
         throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create booking');

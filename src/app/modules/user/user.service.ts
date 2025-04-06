@@ -182,9 +182,33 @@ const getAllUserFromDB = async (
   };
 };
 
+const getSubscribedPlanFromDB = async (user: JwtPayload) => {
+  const subscription = await Subscription.findOne({
+    userId: user.id,
+    status: 'active',
+  });
+  if (!subscription) {
+    return null;
+  }
+  //now find the bookings that falls in the current subscription start and end date
+  const bookingCount = await Booking.countDocuments({
+    userId: user.id,
+    date: {
+      $gte: subscription?.start_date,
+      $lte: subscription?.end_date,
+    },
+  });
+
+  return {
+    subscription,
+    bookingCount,
+  };
+};
+
 export const UserService = {
   createUserToDB,
   getUserProfileFromDB,
   updateProfileToDB,
   getAllUserFromDB,
+  getSubscribedPlanFromDB,
 };

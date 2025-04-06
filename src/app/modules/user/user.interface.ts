@@ -25,6 +25,8 @@ export type IUser = {
   workTerms?: boolean;
   operationTerms?: boolean;
   subscriptionType?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
 };
 
 export type UserModel = {

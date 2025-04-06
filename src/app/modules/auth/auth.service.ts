@@ -59,10 +59,12 @@ const loginUserFromDB = async (payload: ILoginData) => {
 
   await User.findByIdAndUpdate(isExistUser._id, { status: 'active' });
 
-  (global as any).io.emit('userStatusUpdated', { userId: isExistUser._id, status: 'active' });
-  const {password:Pass, ...restData} = isExistUser;
-  return {user:restData,accessToken:createToken};
-
+  (global as any).io.emit('userStatusUpdated', {
+    userId: isExistUser._id,
+    status: 'active',
+  });
+  const { password: Pass, ...restData } = isExistUser;
+  return { user: restData, accessToken: createToken };
 };
 //forget password
 const forgetPasswordToDB = async (email: string) => {
@@ -91,7 +93,9 @@ const forgetPasswordToDB = async (email: string) => {
 //verify email
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
-  const isExistUser = await User.findOne({ email }).select('+authentication').lean();
+  const isExistUser = await User.findOne({ email })
+    .select('+authentication')
+    .lean();
   if (!isExistUser) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
@@ -125,16 +129,21 @@ const verifyEmailToDB = async (payload: IVerifyEmail) => {
     );
     message = 'Email verify successfully';
 
-      //create token
-  const createToken = jwtHelper.createToken(
-    { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
-    config.jwt.jwt_secret as Secret,
-    config.jwt.jwt_expire_in as string
-  );
+    //send email to user
+    const onboardingEmail = emailTemplate.onboardUser({
+      email: isExistUser.email,
+      name: isExistUser.firstName,
+    });
+    emailHelper.sendEmail(onboardingEmail);
+    //create token
+    const createToken = jwtHelper.createToken(
+      { id: isExistUser._id, role: isExistUser.role, email: isExistUser.email },
+      config.jwt.jwt_secret as Secret,
+      config.jwt.jwt_expire_in as string
+    );
 
-  const {authentication,...restData} = isExistUser;
-  data = {user:restData,accessToken:createToken};
-
+    const { authentication, ...restData } = isExistUser;
+    data = { user: restData, accessToken: createToken };
   } else {
     await User.findOneAndUpdate(
       { _id: isExistUser._id },
@@ -263,33 +272,41 @@ const changePasswordToDB = async (
   await User.findOneAndUpdate({ _id: user.id }, updateData, { new: true });
 };
 
-
-const deleteProfile = async (user: JwtPayload) =>{
-
-  const deletedUser = await User.findByIdAndUpdate(user.id,{$set:{status:'delete'}}, {new: true});
+const deleteProfile = async (user: JwtPayload) => {
+  const deletedUser = await User.findByIdAndUpdate(
+    user.id,
+    { $set: { status: 'delete' } },
+    { new: true }
+  );
   if (!deletedUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to delete profile, please try again later.");
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Failed to delete profile, please try again later.'
+    );
   }
+};
 
-}
-
-
-const activeOrRestrictUser = async (user: JwtPayload, id:Types.ObjectId) => {
-
+const activeOrRestrictUser = async (user: JwtPayload, id: Types.ObjectId) => {
   const isUserExist = await User.findById(id);
   if (!isUserExist) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "User doesn't exist!");
   }
 
   const status = isUserExist.status === 'active' ? 'inactive' : 'active';
-  const updatedUser = await User.findByIdAndUpdate(id, { $set: { status } }, { new: true });
+  const updatedUser = await User.findByIdAndUpdate(
+    id,
+    { $set: { status } },
+    { new: true }
+  );
   if (!updatedUser) {
-    throw new ApiError(StatusCodes.BAD_REQUEST, "Failed to update user status, please try again later.");
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      'Failed to update user status, please try again later.'
+    );
   }
 
   return `User ${status} successfully`;
-}
-
+};
 
 export const AuthService = {
   verifyEmailToDB,
@@ -298,5 +315,5 @@ export const AuthService = {
   resetPasswordToDB,
   changePasswordToDB,
   deleteProfile,
-  activeOrRestrictUser
+  activeOrRestrictUser,
 };

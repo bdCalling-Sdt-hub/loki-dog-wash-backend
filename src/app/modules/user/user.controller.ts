@@ -54,11 +54,18 @@ const updateProfile = catchAsync(
   }
 );
 
-
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const filterOptions = pick(req.query, userFilterableFields);
-  const paginationOptions = pick(req.query, ['page', 'limit', 'sortBy', 'sortOrder']);
-  const result = await UserService.getAllUserFromDB(filterOptions, paginationOptions);
+  const paginationOptions = pick(req.query, [
+    'page',
+    'limit',
+    'sortBy',
+    'sortOrder',
+  ]);
+  const result = await UserService.getAllUserFromDB(
+    filterOptions,
+    paginationOptions
+  );
 
   sendResponse(res, {
     success: true,
@@ -68,4 +75,22 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-export const UserController = { createUser, getUserProfile, updateProfile, getAllUsers };
+const getSubscribedPlan = catchAsync(async (req: Request, res: Response) => {
+  const user = req.user;
+  const result = await UserService.getSubscribedPlanFromDB(user);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Subscribed plan retrieved successfully',
+    data: result,
+  });
+});
+
+export const UserController = {
+  createUser,
+  getUserProfile,
+  updateProfile,
+  getAllUsers,
+  getSubscribedPlan,
+};

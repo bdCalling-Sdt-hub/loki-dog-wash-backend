@@ -8,6 +8,10 @@ const bookingSchema = new mongoose.Schema<IBooking, BookingModel>(
       ref: 'User',
       required: true,
     },
+    // subscriptionId: {
+    //   type: Schema.Types.ObjectId,
+    //   ref: 'Subscription',
+    // },
     stationId: {
       type: Schema.Types.ObjectId,
       ref: 'Station',
@@ -16,7 +20,7 @@ const bookingSchema = new mongoose.Schema<IBooking, BookingModel>(
     date: {
       type: Date,
       required: true,
-    }
+    },
   },
   {
     timestamps: true,

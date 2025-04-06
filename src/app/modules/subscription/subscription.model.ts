@@ -1,14 +1,17 @@
 import mongoose, { model, Schema } from 'mongoose';
 import { ISubscription, SubscriptionModel } from './subscription.interface';
 
-const subscriptionSchema = new mongoose.Schema<ISubscription, SubscriptionModel>(
+const subscriptionSchema = new mongoose.Schema<
+  ISubscription,
+  SubscriptionModel
+>(
   {
     userId: {
       type: Schema.Types.ObjectId,
       required: true,
     },
     price_id: {
-      type: String
+      type: String,
     },
     plan_type: {
       type: String,
@@ -22,6 +25,10 @@ const subscriptionSchema = new mongoose.Schema<ISubscription, SubscriptionModel>
     end_date: {
       type: Date,
       required: true,
+    },
+    package_id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Package',
     },
     status: {
       type: String,
@@ -46,4 +53,7 @@ const subscriptionSchema = new mongoose.Schema<ISubscription, SubscriptionModel>
   }
 );
 
-export const Subscription = model<ISubscription>('Subscription', subscriptionSchema);
+export const Subscription = model<ISubscription>(
+  'Subscription',
+  subscriptionSchema
+);
