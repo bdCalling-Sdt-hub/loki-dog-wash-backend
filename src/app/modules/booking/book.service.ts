@@ -11,6 +11,7 @@ import { Package } from '../package/package.model';
 import { User } from '../user/user.model';
 import { DateTime } from 'luxon';
 import { generateTimeCode } from '../station/station.utils';
+import { Review } from '../stationReview/review.model';
 
 interface BookingPayload {
   userId: string;
@@ -206,6 +207,25 @@ const getAllBookingFromDB = async (
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to get booking');
   }
+
+  //get all booking ids
+  const bookingIds = result.map((booking: any) => booking._id);
+  console.log(bookingIds);
+  //get reviews for each booking
+  const reviews = await Review.find(
+    {
+      userId: userId,
+      bookingId: { $in: bookingIds },
+    },
+    { rating: 1, comment: 1, bookingId: 1, createdAt: 1 }
+  );
+
+  //add reviews to each booking
+  result.forEach((booking: any) => {
+    booking.reviews = reviews.filter(
+      (review: any) => review.bookingId.toString() === booking._id.toString()
+    );
+  });
 
   //before returning parse the date to local time
   result.forEach((booking: any) => {

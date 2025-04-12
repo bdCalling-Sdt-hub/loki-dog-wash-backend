@@ -4,8 +4,6 @@ import { IStation } from './station.interface';
 import { Station } from './station.model';
 import { Types } from 'mongoose';
 import { Booking } from '../booking/book.model';
-import { SlotAvailability } from '../../../types/slots';
-import { format, parse } from 'date-fns';
 import { parseDateInUTC } from '../booking/booking.utils';
 import { generateTimeCode, processSlots } from './station.utils';
 
@@ -14,7 +12,7 @@ const createStationToDB = async (
 ): Promise<IStation | null> => {
   //@ts-ignore
   payload.slots = processSlots(payload.slots);
-  console.log(payload.slots);
+
   const result = await Station.create(payload);
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create station!');
@@ -24,10 +22,41 @@ const createStationToDB = async (
 
 const getAllStationsFromDB = async (): Promise<IStation[] | null> => {
   const result = await Station.find().lean();
+
+  const allBookings = await Booking.find({ stationId: result[0]._id }).lean();
+
+  // Calculate station status based on booking percentage
+  const stationsWithStatus = result.map(station => {
+    const stationBookings = allBookings.filter(
+      booking => booking.stationId.toString() === station._id.toString()
+    );
+
+    const totalSlots = station.slots.length;
+    const bookedSlotsCount = stationBookings.length;
+    const bookingPercentage = (bookedSlotsCount / totalSlots) * 100;
+
+    let status;
+    if (bookingPercentage <= 30) {
+      status = 'available';
+    } else if (bookingPercentage <= 60) {
+      status = 'moderate busy';
+    } else {
+      status = 'busy';
+    }
+
+    return {
+      ...station,
+      bookedSlotsCount,
+      totalSlots,
+      status,
+      // bookingPercentage: Math.round(bookingPercentage),
+    };
+  });
+
   if (!result) {
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to fetch stations!');
   }
-  return result;
+  return stationsWithStatus;
 };
 
 const getSingleStation = async (id: string) => {
@@ -44,6 +73,11 @@ const getSingleStation = async (id: string) => {
 };
 
 const updateStation = async (id: string, payload: Partial<IStation>) => {
+  if (payload.slots) {
+    //@ts-ignore
+    payload.slots = processSlots(payload.slots);
+  }
+
   const result = await Station.findByIdAndUpdate(id, payload, {
     new: true,
   }).lean();
@@ -89,10 +123,11 @@ const getStationSlotsWithAvailability = async (
     return station.slots.map(slot => {
       const isBooked = bookedSlots.has(slot.timeCode);
       const restricted = slot.timeCode > Number(oneHourAheadTimeCode);
+
       return {
         slot: slot.slot,
         timeCode: slot.timeCode,
-        availability: !isBooked && !restricted,
+        availability: !isBooked,
       };
     });
   } catch (error) {

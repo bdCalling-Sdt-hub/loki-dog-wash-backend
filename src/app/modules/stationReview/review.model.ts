@@ -1,16 +1,21 @@
-import mongoose, { model } from 'mongoose';
+import mongoose, { model, Schema } from 'mongoose';
 import { IReview, ReviewModel } from './review.interface';
 
 const reviewSchema = new mongoose.Schema<IReview, ReviewModel>(
   {
     userId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'User',
       required: true,
     },
     stationId: {
-      type: String,
+      type: Schema.Types.ObjectId,
       ref: 'Station',
+      required: true,
+    },
+    bookingId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Booking',
       required: true,
     },
     rating: {

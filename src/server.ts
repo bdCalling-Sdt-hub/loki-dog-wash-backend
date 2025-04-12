@@ -93,6 +93,7 @@ async function main() {
       });
     });
   } catch (error) {
+    //@ts-ignore
     errorLogger.error(colors.red('🤢 Failed to connect Database', error));
   }
 
