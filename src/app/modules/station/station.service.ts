@@ -23,7 +23,13 @@ const createStationToDB = async (
 const getAllStationsFromDB = async (): Promise<IStation[] | null> => {
   const result = await Station.find().lean();
 
-  const allBookings = await Booking.find({ stationId: result[0]._id }).lean();
+  //get all bookings for today
+  const today = new Date();
+
+  const allBookings = await Booking.find({
+    stationId: result[0]._id,
+    date: today,
+  }).lean();
 
   // Calculate station status based on booking percentage
   const stationsWithStatus = result.map(station => {
@@ -113,6 +119,7 @@ const getStationSlotsWithAvailability = async (
       })
     );
 
+    console.log(bookings);
     const requestHour = new Date().getHours();
     const requestedHourIn12 = requestHour % 12 || 12; // Convert to 12-hour format
     const requestMinute = new Date().getMinutes();
@@ -123,7 +130,7 @@ const getStationSlotsWithAvailability = async (
     return station.slots.map(slot => {
       const isBooked = bookedSlots.has(slot.timeCode);
       const restricted = slot.timeCode > Number(oneHourAheadTimeCode);
-
+      console.log(isBooked);
       return {
         slot: slot.slot,
         timeCode: slot.timeCode,
