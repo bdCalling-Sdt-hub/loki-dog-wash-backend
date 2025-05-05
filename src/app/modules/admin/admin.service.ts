@@ -250,7 +250,7 @@ interface MonthlySubscriptionData {
 async function getYearlySubscriptionDataInMonthlyFormat(
   stationId?: string,
   year?: number
-): Promise<MonthlySubscriptionData> {
+): Promise<Array<{ month: string; subscriber: number }>> {
   const currentYear = new Date().getFullYear();
   const yearToUse = year || currentYear;
   const startDate = new Date(yearToUse, 0, 1);
@@ -285,7 +285,13 @@ async function getYearlySubscriptionDataInMonthlyFormat(
     monthlyData[monthName] += amount;
   });
 
-  return monthlyData;
+  // Transform the object into an array of objects
+  const formattedData = monthNames.map(month => ({
+    month,
+    subscriber: monthlyData[month],
+  }));
+
+  return formattedData;
 }
 
 const getStationsForDashboard = async () => {

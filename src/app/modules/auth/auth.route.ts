@@ -11,7 +11,11 @@ router.post(
   validateRequest(AuthValidation.createLoginZodSchema),
   AuthController.loginUser
 );
-router.post('/logout', auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER), AuthController.logoutUser);
+router.post(
+  '/logout',
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
+  AuthController.logoutUser
+);
 
 router.post(
   '/delete-profile',
@@ -34,7 +38,7 @@ router.post(
 router.post(
   '/reset-password',
   validateRequest(AuthValidation.createResetPasswordZodSchema),
-  AuthController.resetPassword  
+  AuthController.resetPassword
 );
 
 router.post(
@@ -46,13 +50,13 @@ router.post(
 
 router.post(
   '/delete-profile',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
+  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER),
   AuthController.deleteProfile
 );
 
 router.post(
   '/active-restrict-user/:id',
-  auth(USER_ROLES.SUPER_ADMIN, USER_ROLES.USER, USER_ROLES.ADMIN),
+  auth(USER_ROLES.ADMIN),
   AuthController.activeOrRestrictUser
 );
 
