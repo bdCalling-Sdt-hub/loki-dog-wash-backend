@@ -24,11 +24,20 @@ const createRefer = async (
     }
 
     // Check if the email has already been referred
-    const existingRefer = await Refer.findOne({ email });
+    const [existingRefer, existingUser] = await Promise.all([
+      Refer.findOne({ email }).lean(),
+      User.findOne({ email: email, status: { $nin: ['delete'] } }).lean(),
+    ]);
     if (existingRefer) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
         'This email has already been referred, please use another email.'
+      );
+    }
+    if (existingUser) {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        'This email has already been registered, please try with another email.'
       );
     }
 
