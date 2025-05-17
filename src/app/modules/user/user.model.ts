@@ -6,7 +6,6 @@ import { USER_ROLES } from '../../../enums/user';
 import ApiError from '../../../errors/ApiError';
 import { IUser, UserModel } from './user.interface';
 
-
 const userSchema = new Schema<IUser, UserModel>(
   {
     firstName: {
@@ -26,7 +25,7 @@ const userSchema = new Schema<IUser, UserModel>(
       type: String,
       enum: Object.values(USER_ROLES),
     },
-    stripeCustomerId: { type: String, required: true },
+    stripeCustomerId: { type: String, required: false },
     password: {
       type: String,
       required: true,
@@ -79,16 +78,16 @@ const userSchema = new Schema<IUser, UserModel>(
     },
     readTerms: {
       type: Boolean,
-      default: false
+      default: false,
     },
     workTerms: {
       type: Boolean,
-      default: false
+      default: false,
     },
     operationTerms: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
 
   { timestamps: true }

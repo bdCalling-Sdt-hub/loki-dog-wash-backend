@@ -55,8 +55,14 @@ router.post(
 );
 
 router.post(
+  '/resend-otp',
+  validateRequest(AuthValidation.resendOtp),
+  AuthController.resendOtp
+);
+
+router.post(
   '/active-restrict-user/:id',
-  auth(USER_ROLES.ADMIN),
+  auth(USER_ROLES.ADMIN, USER_ROLES.SUPER_ADMIN),
   AuthController.activeOrRestrictUser
 );
 

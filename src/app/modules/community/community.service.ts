@@ -8,16 +8,22 @@ import { JwtPayload } from 'jsonwebtoken';
 import { Types } from 'mongoose';
 import { sendNotification } from '../../../helpers/sendNotificationHelper';
 
-const askQuestion= async(user:JwtPayload, payload:Partial<ICommunity>): Promise<ICommunity> => {
+const askQuestion = async (
+  user: JwtPayload,
+  payload: Partial<ICommunity>
+): Promise<ICommunity> => {
   payload.userId = user.id;
   const question = await Community.create(payload);
-  
+
   const populatedQuestion = await Community.findById(question._id)
     .populate('userId', 'firstName image')
     .populate('replies.userId', 'firstName image');
 
   if (!populatedQuestion) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to create question');
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to create question'
+    );
   }
 
   // Emit to all connected users
@@ -25,7 +31,6 @@ const askQuestion= async(user:JwtPayload, payload:Partial<ICommunity>): Promise<
 
   return populatedQuestion;
 };
-
 
 const replyToQuestion = async (
   user: JwtPayload,
@@ -50,11 +55,17 @@ const replyToQuestion = async (
   const [isUserExist, populatedQuestion] = await Promise.all([
     User.findById(user.id),
     Community.findById(question._id)
-      .populate<{ userId: { _id: Types.ObjectId; firstName: string; image: string } }>({
+      .populate<{
+        userId: { _id: Types.ObjectId; firstName: string; image: string };
+      }>({
         path: 'userId',
         select: '_id firstName image',
       })
-      .populate<{ replies: { userId: { _id: Types.ObjectId; firstName: string; image: string } }[] }>({
+      .populate<{
+        replies: {
+          userId: { _id: Types.ObjectId; firstName: string; image: string };
+        }[];
+      }>({
         path: 'replies.userId',
         select: '_id firstName image',
       }),
@@ -64,27 +75,32 @@ const replyToQuestion = async (
     throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
   }
   if (!populatedQuestion) {
-    throw new ApiError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to populate question');
+    throw new ApiError(
+      StatusCodes.INTERNAL_SERVER_ERROR,
+      'Failed to populate question'
+    );
   }
 
   const repliedUserIds = populatedQuestion.replies
-    .map((reply) => reply.userId?._id?.toString())
+    .map(reply => reply.userId?._id?.toString())
     .filter(Boolean);
   const uniqueRepliedUserIds = [...new Set(repliedUserIds)];
 
   const questionOwnerId = populatedQuestion.userId._id.toString();
 
-  const notificationPromises = uniqueRepliedUserIds.map(async (userId) => {
-    console.log(userId, user.id)
+  const notificationPromises = uniqueRepliedUserIds.map(async userId => {
     // console.log('Notification sent to user:', userId);
-    if(userId === user.id) return;
+    if (userId === user.id) return;
     try {
       await sendNotification('notification', userId, {
         receiverId: new Types.ObjectId(userId),
         senderId: new Types.ObjectId(user.id),
         type: 'QUESTION_REPLY',
         questionId: populatedQuestion._id,
-        title: userId === questionOwnerId ? `${isUserExist.firstName} has replied to your question` : `${isUserExist.firstName} has replied to your response on ${populatedQuestion.userId.firstName}'s question`,
+        title:
+          userId === questionOwnerId
+            ? `${isUserExist.firstName} has replied to your question`
+            : `${isUserExist.firstName} has replied to your response on ${populatedQuestion.userId.firstName}'s question`,
         message: replyData,
         read: false,
       });
@@ -93,8 +109,8 @@ const replyToQuestion = async (
     }
   });
 
-  const socketEmitPromises = uniqueRepliedUserIds.map(async (userId) => {
-    if(userId === user.id) return;
+  const socketEmitPromises = uniqueRepliedUserIds.map(async userId => {
+    if (userId === user.id) return;
     try {
       (global as any).io.emit(`newReply::${userId}`, {
         questionId: populatedQuestion._id,
@@ -110,21 +126,24 @@ const replyToQuestion = async (
   return populatedQuestion;
 };
 
-
 const getQuestions = async () => {
-  const questions = await Community.find().populate('userId', 'firstName image').populate('replies.userId', 'firstName image').sort({ createdAt: -1 });
+  const questions = await Community.find()
+    .populate('userId', 'firstName image')
+    .populate('replies.userId', 'firstName image')
+    .sort({ createdAt: -1 });
   return questions;
 };
 
-
 const getQuestion = async (id: string) => {
-  const question = await Community.findById(id).populate('userId', 'firstName image').populate('replies.userId', 'firstName image');
+  const question = await Community.findById(id)
+    .populate('userId', 'firstName image')
+    .populate('replies.userId', 'firstName image');
   return question;
 };
 
-  export const CommunityService = {
+export const CommunityService = {
   askQuestion,
   replyToQuestion,
   getQuestions,
-  getQuestion
+  getQuestion,
 };

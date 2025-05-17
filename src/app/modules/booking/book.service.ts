@@ -131,23 +131,6 @@ const createBookingToDB = async (payload: BookingPayload) => {
       );
 
       return result;
-      // const result = await Booking.create(bookingData);
-      // if (!result) {
-      //   throw new ApiError(StatusCodes.BAD_REQUEST, 'Failed to create booking');
-      // }
-
-      // const url = await SubscriptionService.createCheckoutSession(
-      //   packageData._id.toString(),
-      //   payload.userId,
-      //   'payment',
-      //   result._id.toString()
-      // );
-
-      // return {
-      //   url: url,
-      //   booking: null,
-      //   isPaymentRequired: true,
-      // };
     } else {
       // Check if the subscription is valid
       //also see if the the total wash is less than the package limit

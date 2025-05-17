@@ -34,7 +34,7 @@ const loginUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logoutUser = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user;  // User info comes from middleware
+  const user = req.user; // User info comes from middleware
 
   if (!user) {
     throw new ApiError(StatusCodes.UNAUTHORIZED, 'User not found.');
@@ -44,8 +44,11 @@ const logoutUser = catchAsync(async (req: Request, res: Response) => {
   await User.findByIdAndUpdate(user.id, { status: 'inactive' });
 
   // Emit user status update event
-  
-    (global as any).io.emit('userStatusUpdated', { userId: user.id, status: 'inactive' });
+
+  (global as any).io.emit('userStatusUpdated', {
+    userId: user.id,
+    status: 'inactive',
+  });
 
   sendResponse(res, {
     success: true,
@@ -91,7 +94,6 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const deleteProfile = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   await AuthService.deleteProfile(user);
@@ -106,12 +108,27 @@ const deleteProfile = catchAsync(async (req: Request, res: Response) => {
 const activeOrRestrictUser = catchAsync(async (req: Request, res: Response) => {
   const user = req.user;
   const { id } = req.params;
-  const result = await AuthService.activeOrRestrictUser(user, new Types.ObjectId(id));
+  const result = await AuthService.activeOrRestrictUser(
+    user,
+    new Types.ObjectId(id)
+  );
 
   sendResponse(res, {
     success: true,
     statusCode: StatusCodes.OK,
     message: result,
+  });
+});
+
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+  const { email } = req.body;
+  const result = await AuthService.resendOtp(email);
+
+  sendResponse(res, {
+    success: true,
+    statusCode: StatusCodes.OK,
+    message: 'Otp send successfully',
+    data: result,
   });
 });
 
@@ -124,4 +141,5 @@ export const AuthController = {
   changePassword,
   activeOrRestrictUser,
   deleteProfile,
+  resendOtp,
 };

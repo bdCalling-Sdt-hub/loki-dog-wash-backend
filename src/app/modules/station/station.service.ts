@@ -93,6 +93,56 @@ const updateStation = async (id: string, payload: Partial<IStation>) => {
   return result;
 };
 
+// const getStationSlotsWithAvailability = async (
+//   stationId: string,
+//   dateString?: string
+// ) => {
+//   try {
+//     // Parse the date string or use the current date
+//     const date = dateString
+//       ? parseDateInUTC(dateString, 'dd/MM/yyyy')
+//       : new Date();
+//     date.setUTCHours(0, 0, 0, 0);
+//     // Find the station
+//     const station = await Station.findById(stationId).lean();
+//     if (!station) {
+//       throw new Error('Station not found');
+//     }
+
+//     // Fetch bookings for the given date
+//     const bookings = await Booking.find({
+//       stationId: new Types.ObjectId(stationId),
+//       date: { $gte: date, $lt: new Date(date.getTime() + 86400000) }, // 24*60*60*1000
+//     }).lean();
+//     const bookedSlots = new Set(
+//       bookings.map(booking => {
+//         return booking.timeCode;
+//       })
+//     );
+
+//     const requestHour = new Date().getHours();
+//     const requestedHourIn12 = requestHour % 12 || 12; // Convert to 12-hour format
+//     const requestMinute = new Date().getMinutes();
+//     const amPm = requestHour >= 12 ? 'pm' : 'am';
+//     const slotTime = `${requestedHourIn12 + 1}.${requestMinute} ${amPm}`;
+//     const oneHourAheadTimeCode = generateTimeCode(slotTime);
+
+//     return station.slots.map(slot => {
+//       const isBooked = bookedSlots.has(slot.timeCode);
+//       const restricted = slot.timeCode > Number(oneHourAheadTimeCode);
+
+//       return {
+//         slot: slot.slot,
+//         timeCode: slot.timeCode,
+//         availability: !isBooked,
+//       };
+//     });
+//   } catch (error) {
+//     console.error('Error fetching slots:', error);
+//     throw error;
+//   }
+// };
+
 const getStationSlotsWithAvailability = async (
   stationId: string,
   dateString?: string
@@ -102,12 +152,13 @@ const getStationSlotsWithAvailability = async (
     const date = dateString
       ? parseDateInUTC(dateString, 'dd/MM/yyyy')
       : new Date();
-    date.setUTCHours(0, 0, 0, 0); // Set to start of the day in UTC
+    date.setUTCHours(0, 0, 0, 0);
     // Find the station
     const station = await Station.findById(stationId).lean();
     if (!station) {
       throw new Error('Station not found');
     }
+
     // Fetch bookings for the given date
     const bookings = await Booking.find({
       stationId: new Types.ObjectId(stationId),
@@ -119,22 +170,33 @@ const getStationSlotsWithAvailability = async (
       })
     );
 
-    console.log(bookings);
-    const requestHour = new Date().getHours();
+    // Get current time information
+    const now = new Date();
+    const requestHour = now.getHours();
     const requestedHourIn12 = requestHour % 12 || 12; // Convert to 12-hour format
-    const requestMinute = new Date().getMinutes();
+    const requestMinute = now.getMinutes();
     const amPm = requestHour >= 12 ? 'pm' : 'am';
+
+    // Generate current time code
+    const currentTimeCode = generateTimeCode(
+      `${requestedHourIn12}.${requestMinute} ${amPm}`
+    );
+
+    // Generate one hour ahead time code
     const slotTime = `${requestedHourIn12 + 1}.${requestMinute} ${amPm}`;
     const oneHourAheadTimeCode = generateTimeCode(slotTime);
 
     return station.slots.map(slot => {
       const isBooked = bookedSlots.has(slot.timeCode);
-      const restricted = slot.timeCode > Number(oneHourAheadTimeCode);
-      console.log(isBooked);
+      const isPastSlot = Number(slot.timeCode) <= Number(currentTimeCode);
+      const isWithinOneHour =
+        Number(slot.timeCode) <= Number(oneHourAheadTimeCode) &&
+        Number(slot.timeCode) > Number(currentTimeCode);
+
       return {
         slot: slot.slot,
         timeCode: slot.timeCode,
-        availability: !isBooked,
+        availability: !isBooked && !isPastSlot && !isWithinOneHour,
       };
     });
   } catch (error) {

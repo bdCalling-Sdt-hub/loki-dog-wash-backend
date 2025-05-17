@@ -28,10 +28,24 @@ const loginUserFromDB = async (payload: ILoginData) => {
 
   //check verified and status
   if (!isExistUser.verified) {
-    throw new ApiError(
-      StatusCodes.BAD_REQUEST,
-      'Please verify your account, then try to login again'
-    );
+    //generate otp
+    const otp = generateOTP();
+
+    const verifyAccount = emailTemplate.accountVerificationOrReset({
+      email: isExistUser.email,
+      name: isExistUser.firstName,
+      otp: otp.toString(),
+      type: 'verification' as const,
+    });
+    emailHelper.sendEmail(verifyAccount);
+
+    //save to DB
+    const authentication = {
+      oneTimeCode: otp,
+      expireAt: new Date(Date.now() + 3 * 60000),
+    };
+    await User.findOneAndUpdate({ email }, { $set: { authentication } });
+    throw new ApiError(409, 'Please verify your email first');
   }
 
   //check user status
@@ -93,7 +107,7 @@ const forgetPasswordToDB = async (email: string) => {
 //verify email
 const verifyEmailToDB = async (payload: IVerifyEmail) => {
   const { email, oneTimeCode } = payload;
-  const isExistUser = await User.findOne({ email })
+  const isExistUser = await User.findOne({ email: email })
     .select('+authentication')
     .lean();
   if (!isExistUser) {
@@ -308,6 +322,51 @@ const activeOrRestrictUser = async (user: JwtPayload, id: Types.ObjectId) => {
   return `User ${status} successfully`;
 };
 
+const resendOtp = async (email: string) => {
+  const isExistUser = await User.findOne({ email }).select('+authentication');
+  if (!isExistUser) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      `No account found with this ${email ? 'email' : 'phone'}`
+    );
+  }
+
+  const otp = generateOTP();
+  await User.findOneAndUpdate(
+    { email },
+    {
+      $set: {
+        authentication: {
+          oneTimeCode: otp,
+          expireAt: new Date(Date.now() + 3 * 60000),
+        },
+      },
+    },
+    { new: true }
+  );
+
+  if (isExistUser.authentication?.isResetPassword) {
+    const resetPassword = emailTemplate.accountVerificationOrReset({
+      email: isExistUser.email,
+      name: isExistUser.firstName,
+      otp: otp.toString(),
+      type: 'reset',
+    });
+    emailHelper.sendEmail(resetPassword);
+  }
+
+  const verifyAccount = emailTemplate.accountVerificationOrReset({
+    email: isExistUser.email,
+    name: isExistUser.firstName,
+    otp: otp.toString(),
+    type: 'reset',
+  });
+
+  emailHelper.sendEmail(verifyAccount);
+
+  return 'Otp sent successfully';
+};
+
 export const AuthService = {
   verifyEmailToDB,
   loginUserFromDB,
@@ -316,4 +375,5 @@ export const AuthService = {
   changePasswordToDB,
   deleteProfile,
   activeOrRestrictUser,
+  resendOtp,
 };
